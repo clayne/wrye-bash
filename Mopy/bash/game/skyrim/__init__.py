@@ -212,6 +212,11 @@ class SkyrimGameInfo(GameInfo):
         0x13749 : 0x69473, #--Bos
         }
 
+    yak = set(globals().keys())
+    from .constants import *
+    yak = {x: y for x, y in globals().iteritems() if x not in yak}
+    print yak.keys()
+
     @classmethod
     def init(cls):
         yak = locals()

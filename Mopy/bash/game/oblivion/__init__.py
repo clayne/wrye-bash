@@ -228,7 +228,8 @@ class OblivionGameInfo(GameInfo):
 
     @classmethod
     def init(cls):
-        yak = locals()
+        yak = {}
+        yak.update(locals())
         from .constants import graphicsModelAttrs, allBethFiles, \
             record_type_name, GlobalsTweaks, namesTypes, bethDataFiles, \
             graphicsFidTypes, fid1Conditions, cellRecFlags, cellAutoKeys, \
@@ -236,9 +237,15 @@ class OblivionGameInfo(GameInfo):
             GmstTweaks, conditionFunctionData, allConditions, fid2Conditions, \
             statsTypes, xEdit_expert, soundsTypes, cellRecAttrs, \
             soundsLongsTypes, listTypes, graphicsLongsTypes, gmstEids
+        print dir(constants)
 
         yak = {x: y for x,y in locals().iteritems() if x not in yak}
-        globals().update(yak)
+        import sys
+        print sys.modules[__name__]
+        print 'YAkkkkkkkkkkkkkkkkkk', yak.keys()
+        for k,v in yak.iteritems():
+            setattr(sys.modules[__name__], k, v)
+        print dir(sys.modules[__name__])
         from .records import MreActi, MreAlch, MreAmmo, MreAnio, MreAppa, \
             MreArmo, MreBook, MreBsgn, MreClas, MreClot, MreCont, MreCrea, \
             MreDoor, MreEfsh, MreEnch, MreEyes, MreFact, MreFlor, MreFurn, \

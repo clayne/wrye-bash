@@ -166,6 +166,7 @@ def __setGame(name, msg):
     gamePath = foundGames[name]
     game = _allGames[name](gamePath)
     game_mod = _allModules[name]
+    print game
     deprint(msg % {'gamename': name}, gamePath)
     # Unload the other modules from the cache
     for i in _allGames.keys():

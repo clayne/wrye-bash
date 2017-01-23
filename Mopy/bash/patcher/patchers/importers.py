@@ -257,6 +257,7 @@ class _ACellImporter(AImportPatcher):
     name = _(u'Import Cells')
 
 class CellImporter(_ACellImporter, ImportPatcher):
+    print dir(game)
     autoKey = game_mod.cellAutoKeys
     logMsg = _(u'Cells/Worlds Patched')
 
