@@ -29,6 +29,7 @@ that are used by multiple objects."""
 # Imports ---------------------------------------------------------------------
 import collections
 import struct
+import sys
 import game as game_init
 from bass import get_ini_option
 from bolt import GPath, Path, deprint
@@ -171,6 +172,8 @@ def __setGame(name, msg):
         if i != name:
             del _allGames[i]
             del _allModules[i]  # the keys should be the same
+            # for k in sys.modules.keys():
+            #     if k.startswith('bash.game.' + i): del sys.modules[k]
     game.init()
 
 def detect_and_set_game(cli_game_dir=u'', bash_ini_=None, name=None):

@@ -23,7 +23,6 @@
 # =============================================================================
 """GameInfo override for Fallout 4."""
 
-from .constants import *
 from .default_tweaks import default_tweaks
 from .. import GameInfo
 from ... import brec
@@ -135,6 +134,18 @@ class Fallout4GameInfo(GameInfo):
     # ---------------------------------------------------------------------
     @classmethod
     def init(cls):
+        yak = locals()
+        from .constants import graphicsModelAttrs, allBethFiles, \
+            record_type_name, GlobalsTweaks, namesTypes, bethDataFiles, \
+            fid5Conditions, graphicsFidTypes, fid1Conditions, cellRecFlags, \
+            cellAutoKeys, inventoryTypes, pricesTypes, statsHeaders, \
+            graphicsTypes, GmstTweaks, conditionFunctionData, allConditions, \
+            fid2Conditions, statsTypes, xEdit_expert, soundsTypes, \
+            cellRecAttrs, soundsLongsTypes, listTypes, graphicsLongsTypes, \
+            gmstEids
+
+        yak = {x: y for x,y in locals().iteritems() if x not in yak}
+        globals().update(yak)
         # First import from fallout4.records file, so MelModel is set correctly
         from .records import MreHeader, MreLvli, MreLvln
         # ---------------------------------------------------------------------

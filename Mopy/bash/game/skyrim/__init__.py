@@ -23,7 +23,6 @@
 # =============================================================================
 """GameInfo override for TES V: Skyrim."""
 
-from .constants import *
 from .default_tweaks import default_tweaks
 from .. import GameInfo
 from ... import brec
@@ -215,6 +214,20 @@ class SkyrimGameInfo(GameInfo):
 
     @classmethod
     def init(cls):
+        yak = locals()
+        from .constants import graphicsModelAttrs, soundsFidTypes, \
+            allBethFiles, record_type_name, GlobalsTweaks, namesTypes, \
+            bethDataFiles, fid5Conditions, graphicsFidTypes, fid1Conditions, \
+            cellRecFlags, cellAutoKeys, inventoryTypes, pricesTypes, \
+            statsHeaders, graphicsTypes, GmstTweaks, stringSoundsRecs, \
+            conditionFunctionData, allConditions, fid2Conditions, statsTypes, \
+            xEdit_expert, soundsTypes, cellRecAttrs, soundsLongsTypes, \
+            listTypes, graphicsLongsTypes, gmstEids
+
+        yak = {x: y for x,y in locals().iteritems() if x not in yak}
+        del yak['yak']
+        del yak['constants']
+        globals().update(yak)
         from .records import MreCell, MreWrld, MreFact, MreAchr, MreDial, \
             MreInfo, MreCams, MreWthr, MreDual, MreMato, MreVtyp, MreMatt, \
             MreLvsp, MreEnch, MreProj, MreDlbr, MreRfct, MreMisc, MreActi, \

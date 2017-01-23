@@ -85,6 +85,10 @@ class SkyrimSEGameInfo(SkyrimGameInfo):
 
     @classmethod
     def init(cls):
+        yak = locals()
+        from .constants import *
+        yak = {x: y for x,y in locals() if x not in yak}
+        globals().update(yak)
         # First import from skyrimse.records file
         from .records import MreWthr, MreMato, MreLtex, MreWatr, MreWeap, \
             MreStat, MreAmmo, MreVoli, MreLens

@@ -23,7 +23,6 @@
 # =============================================================================
 """GameInfo override for TES IV: Oblivion."""
 
-from .constants import *
 from .default_tweaks import default_tweaks
 from .. import GameInfo
 from ... import brec
@@ -229,6 +228,17 @@ class OblivionGameInfo(GameInfo):
 
     @classmethod
     def init(cls):
+        yak = locals()
+        from .constants import graphicsModelAttrs, allBethFiles, \
+            record_type_name, GlobalsTweaks, namesTypes, bethDataFiles, \
+            graphicsFidTypes, fid1Conditions, cellRecFlags, cellAutoKeys, \
+            inventoryTypes, pricesTypes, statsHeaders, graphicsTypes, \
+            GmstTweaks, conditionFunctionData, allConditions, fid2Conditions, \
+            statsTypes, xEdit_expert, soundsTypes, cellRecAttrs, \
+            soundsLongsTypes, listTypes, graphicsLongsTypes, gmstEids
+
+        yak = {x: y for x,y in locals().iteritems() if x not in yak}
+        globals().update(yak)
         from .records import MreActi, MreAlch, MreAmmo, MreAnio, MreAppa, \
             MreArmo, MreBook, MreBsgn, MreClas, MreClot, MreCont, MreCrea, \
             MreDoor, MreEfsh, MreEnch, MreEyes, MreFact, MreFlor, MreFurn, \
