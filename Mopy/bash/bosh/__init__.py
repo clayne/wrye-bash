@@ -995,8 +995,11 @@ class SaveInfo(FileInfo):
         else:
             return -10
 
-    def readHeader(self):
+    def readHeader(self,__once=[]):
         """Read header from file and set self.header attribute."""
+        if not __once:
+            __once.append(True)
+            deprint("sys.modules", '\n'.join(x for x, v in sys.modules.items() if v is not None))
         try:
             self.header = get_save_header_type(bush.game.fsName)(self.abs_path)
         except SaveHeaderError as e:

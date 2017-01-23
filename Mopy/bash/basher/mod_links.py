@@ -1223,7 +1223,7 @@ class Mod_ScanDirty(ItemLink):
     def _initData(self, window, selection):
         super(Mod_ScanDirty, self)._initData(window, selection)
         # settings['bash.CBashEnabled'] is set once in BashApp.Init() AFTER
-        # InitLinks() is called in bash.py
+        # InitLinks() is called in main.py
         self._text = _(u'Scan for Dirty Edits') if bass.settings[
             'bash.CBashEnabled'] else _(u"Scan for UDR's")
 

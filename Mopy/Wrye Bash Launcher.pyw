@@ -80,10 +80,10 @@ class UnicodeImporter(object):
             print 'fail', filename+ext
             raise ImportError, u'caused by ' + repr(e), sys.exc_info()[2]
 
-if not hasattr(sys,'frozen'):
-    sys.meta_path = [UnicodeImporter()]
+# if not hasattr(sys,'frozen'):
+#     sys.meta_path = [UnicodeImporter()]
 
 if __name__ == '__main__':
-    from bash import bash, barg
+    from bash import main, barg
     opts = barg.parse()
-    bash.main(opts)
+    main.main(opts)
