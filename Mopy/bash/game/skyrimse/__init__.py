@@ -86,8 +86,15 @@ class SkyrimSEGameInfo(SkyrimGameInfo):
     @classmethod
     def init(cls):
         yak = locals()
-        from .constants import *
-        yak = {x: y for x,y in locals() if x not in yak}
+        from .constants import graphicsModelAttrs, soundsFidTypes, \
+            allBethFiles, record_type_name, GlobalsTweaks, namesTypes, \
+            bethDataFiles, fid5Conditions, graphicsFidTypes, fid1Conditions, \
+            cellRecFlags, cellAutoKeys, inventoryTypes, pricesTypes, \
+            statsHeaders, graphicsTypes, GmstTweaks, stringSoundsRecs, \
+            conditionFunctionData, allConditions, fid2Conditions, statsTypes, \
+            xEdit_expert, soundsTypes, cellRecAttrs, soundsLongsTypes, \
+            listTypes, graphicsLongsTypes, gmstEids
+        yak = {x: y for x,y in locals().iteritems() if x not in yak}
         globals().update(yak)
         # First import from skyrimse.records file
         from .records import MreWthr, MreMato, MreLtex, MreWatr, MreWeap, \
