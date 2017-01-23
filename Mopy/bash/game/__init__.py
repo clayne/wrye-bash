@@ -29,6 +29,19 @@ brec.RecordHeader/MreRecord class variables."""
 from .. import brec
 # from .constants import * # TODO(ut): create a .constants module
 
+def dynamic_import_hack(package_name):
+    print __name__
+    print package_name
+    import importlib
+    constants = importlib.import_module('.constants', package=package_name)
+    print "-----------------------dir(constants)", dir(constants)
+    import sys
+    for k in dir(constants):
+        if k.startswith('_'): continue
+        setattr(sys.modules[package_name], k, getattr(constants, k))
+    print "-----------------------dir(sys.modules[__name__])", dir(
+        sys.modules[__name__])
+
 class GameInfo(object):
     # Main game info - should be overridden -----------------------------------
     # Name of the game to use in UI.

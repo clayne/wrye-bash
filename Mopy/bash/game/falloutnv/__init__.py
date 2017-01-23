@@ -247,6 +247,8 @@ class FalloutNVGameInfo(GameInfo):
 
     @classmethod
     def init(cls):
+        from .. import dynamic_import_hack
+        dynamic_import_hack(__name__)
         # From Valda's version
         # MreAchr, MreAcre, MreActi, MreAlch, MreAloc, MreAmef, MreAmmo,
         # MreAnio, MreAppa, MreArma, MreArmo, MreAspc, MreAvif, MreBook,

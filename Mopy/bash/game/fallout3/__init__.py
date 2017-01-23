@@ -246,6 +246,8 @@ class Fallout3GameInfo(GameInfo):
 
     @classmethod
     def init(cls):
+        from .. import dynamic_import_hack
+        dynamic_import_hack(__name__)
         # From Valda's version
         # MreAchr, MreAcre, MreActi, MreAlch, MreAmmo, MreAnio, MreAppa,
         # MreArmo, MreBook, MreBsgn, MreCell, MreClas, MreClot, MreCont,

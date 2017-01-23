@@ -23,7 +23,6 @@
 # =============================================================================
 """GameInfo override for TES IV: Oblivion."""
 
-from .constants import *
 from .default_tweaks import default_tweaks
 from .. import GameInfo
 from ... import brec
@@ -229,6 +228,8 @@ class OblivionGameInfo(GameInfo):
 
     @classmethod
     def init(cls):
+        from .. import dynamic_import_hack
+        dynamic_import_hack(__name__)
         from .records import MreActi, MreAlch, MreAmmo, MreAnio, MreAppa, \
             MreArmo, MreBook, MreBsgn, MreClas, MreClot, MreCont, MreCrea, \
             MreDoor, MreEfsh, MreEnch, MreEyes, MreFact, MreFlor, MreFurn, \

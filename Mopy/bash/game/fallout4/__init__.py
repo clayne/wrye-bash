@@ -23,7 +23,6 @@
 # =============================================================================
 """GameInfo override for Fallout 4."""
 
-from .constants import *
 from .default_tweaks import default_tweaks
 from .. import GameInfo
 from ... import brec
@@ -135,6 +134,8 @@ class Fallout4GameInfo(GameInfo):
     # ---------------------------------------------------------------------
     @classmethod
     def init(cls):
+        from .. import dynamic_import_hack
+        dynamic_import_hack(__name__)
         # First import from fallout4.records file, so MelModel is set correctly
         from .records import MreHeader, MreLvli, MreLvln
         # ---------------------------------------------------------------------
