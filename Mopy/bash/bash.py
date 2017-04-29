@@ -171,7 +171,7 @@ def _bash_ini_parser(bash_ini_path):
     return bash_ini_parser
 
 # Main ------------------------------------------------------------------------
-def main(opts):
+def main(opts, fake_importer):
     """Run the Wrye Bash main loop.
 
     :param opts: command line arguments
@@ -181,7 +181,7 @@ def main(opts):
     # Then import wx so we can style our error messages nicely
     _import_wx()
     try:
-        _main(opts)
+        _main(opts, fake_importer)
     except Exception as e:
         msg = u'\n'.join([
             _(u'Wrye Bash encountered an error.'),
@@ -196,7 +196,7 @@ def main(opts):
         _show_wx_error(msg)
         sys.exit(1)
 
-def _main(opts):
+def _main(opts, fake_importer):
     """Run the Wrye Bash main loop.
 
     This function is marked private because it should be inside a try-except
@@ -260,7 +260,7 @@ def _main(opts):
             restore_ = None
     # The rest of backup/restore functionality depends on setting the game
     try:
-        bashIni, bush_game, game_ini_path = _detect_game(opts, bash_ini_path)
+        bashIni, bush_game, game_ini_path = _detect_game(opts, bash_ini_path, fake_importer)
         if not bush_game: return
         if restore_:
             try:
@@ -274,7 +274,7 @@ def _main(opts):
                 # reset the game and ini
                 import bush
                 bush.reset_bush_globals()
-                bashIni, bush_game, game_ini_path = _detect_game(opts, u'bash.ini')
+                bashIni, bush_game, game_ini_path = _detect_game(opts, u'bash.ini', fake_importer)
         import bosh # this imports balt (DUH) which imports wx
         bosh.initBosh(bashIni, game_ini_path)
         env.isUAC = env.testUAC(bush_game.gamePath.join(u'Data'))
@@ -362,7 +362,7 @@ def _main(opts):
     app.Init() # Link.Frame is set here !
     app.MainLoop()
 
-def _detect_game(opts, backup_bash_ini):
+def _detect_game(opts, backup_bash_ini, fake_importer):
     # Read the bash.ini file either from Mopy or from the backup location
     bashIni = _bash_ini_parser(backup_bash_ini)
     # if uArg is None, then get the UserPath from the ini file
@@ -376,7 +376,7 @@ def _detect_game(opts, backup_bash_ini):
         os.environ['HOMEDRIVE'] = drive
         os.environ['HOMEPATH'] = path
     # Detect the game we're running for ---------------------------------------
-    bush_game = _import_bush_and_set_game(opts, bashIni)
+    bush_game = _import_bush_and_set_game(opts, bashIni, fake_importer)
     if not bush_game:
         return None, None, None
     #--Initialize Directories to perform backup/restore operations
@@ -385,10 +385,11 @@ def _detect_game(opts, backup_bash_ini):
                                              opts.localAppDataPath, bush_game)
     return bashIni, bush_game, game_ini_path
 
-def _import_bush_and_set_game(opts, bashIni):
+def _import_bush_and_set_game(opts, bashIni, fake_importer):
     import bush
     bolt.deprint(u'Searching for game to manage:')
-    ret = bush.detect_and_set_game(opts.oblivionPath, bashIni)
+    ret = bush.detect_and_set_game(opts.oblivionPath, bashIni,
+                                   fake_importer=fake_importer)
     if ret is not None:  # None == success
         if len(ret) == 0:
             msgtext = _(

@@ -29,6 +29,7 @@ that are used by multiple objects."""
 # Imports ---------------------------------------------------------------------
 import collections
 import struct
+import sys
 import game as game_init
 from bass import get_ini_option
 from bolt import GPath, Path, deprint
@@ -54,7 +55,7 @@ def reset_bush_globals():
               _display_fsName):
         d.clear()
 
-def _supportedGames(useCache=True):
+def _supportedGames(useCache, fake_importer):
     """Set games supported by Bash and return their paths from the registry."""
     if useCache and _allGames: return _registryGames.copy()
     # rebuilt cache
@@ -62,7 +63,21 @@ def _supportedGames(useCache=True):
     _registryGames.clear()
     _fsName_display.clear()
     _display_fsName.clear()
+    importer = not hasattr(sys,'frozen') and sys.meta_path[0]
+    try:
+        if not hasattr(sys,'frozen'):
+            sys.meta_path = [fake_importer()]
+        return __supportedGames(useCache, fake_importer)
+    finally:
+        if not hasattr(sys,'frozen'):
+            fake_importer.cleanup()
+            del sys.modules['bash'].game
+            # del sys.modules['bash'].brec
+            sys.meta_path = [importer]
+
+def __supportedGames(useCache, fake_importer):
     import pkgutil
+    import game as game_init
     # Detect the known games
     for importer, modname, ispkg in pkgutil.iter_modules(game_init.__path__):
         if not ispkg: continue # game support modules are packages
@@ -72,7 +87,7 @@ def _supportedGames(useCache=True):
             submod = getattr(module,modname)
             game_type = submod.GAME_TYPE
             _allModules[game_type.fsName] = submod
-            _allGames[game_type.fsName] = game_type
+            _allGames[game_type.fsName] = game_type, modname
             _fsName_display[game_type.fsName] = game_type.displayName
             #--Get this game's install path
             game_path = get_registry_game_path(game_type)
@@ -89,7 +104,7 @@ def _supportedGames(useCache=True):
         deprint(u' %s:' % foundName, _registryGames[foundName])
     return _registryGames.copy()
 
-def _detectGames(cli_path=u'', bash_ini_=None):
+def _detectGames(cli_path=u'', bash_ini_=None, fake_importer=None):
     """Detect which supported games are installed.
 
     - If Bash supports no games raise.
@@ -107,7 +122,7 @@ def _detectGames(cli_path=u'', bash_ini_=None):
       via -g argument).
     """
     #--Find all supported games and all games in the windows registry
-    foundGames_ = _supportedGames() # sets _allGames if not set
+    foundGames_ = _supportedGames(useCache=True, fake_importer=fake_importer) # sets _allGames if not set
     if not _allGames: # if allGames is empty something goes badly wrong
         raise BoltError(_(u'No game support modules found in Mopy/bash/game.'))
     # check in order of precedence the -o argument, the ini and our parent dir
@@ -147,7 +162,7 @@ def _detectGames(cli_path=u'', bash_ini_=None):
     deprint(u'Detecting games via the -o argument, bash.ini and relative path:')
     # iterate installPaths in insert order ('cmd', 'ini', 'upMopy')
     for test_path, foundMsg, errorMsg in installPaths.itervalues():
-        for name, info in _allGames.items():
+        for name, (info, _modname) in _allGames.items():
             if test_path.join(*info.game_detect_file).exists():
                 # Must be this game
                 deprint(foundMsg % {'gamename': name}, test_path)
@@ -162,20 +177,18 @@ def __setGame(name, msg):
     """Set bush game globals - raise if they are already set."""
     global game, game_mod
     if game is not None: raise BoltError(u'Trying to reset the game')
+    module = __import__('game', globals(), locals(), [_allGames[name][1]], -1)
+    game_mod = getattr(module, _allGames[name][1])
     gamePath = foundGames[name]
-    game = _allGames[name](gamePath)
-    game_mod = _allModules[name]
+    game = game_mod.GAME_TYPE(gamePath)
     deprint(msg % {'gamename': name}, gamePath)
-    # Unload the other modules from the cache
-    for i in _allGames.keys():
-        if i != name:
-            del _allGames[i]
-            del _allModules[i]  # the keys should be the same
+    _allGames.clear(); _allModules.clear()
     game.init()
 
-def detect_and_set_game(cli_game_dir=u'', bash_ini_=None, name=None):
+def detect_and_set_game(cli_game_dir, bash_ini_, name=None,
+                        fake_importer=None):
     if name is None: # detect available games
-        foundGames_, name = _detectGames(cli_game_dir, bash_ini_)
+        foundGames_, name = _detectGames(cli_game_dir, bash_ini_, fake_importer)
         foundGames.update(foundGames_) # set the global name -> game path dict
     else:
         name = _display_fsName[name] # we are passed a display name in
