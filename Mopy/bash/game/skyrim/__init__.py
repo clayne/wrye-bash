@@ -23,6 +23,7 @@
 # =============================================================================
 """GameInfo override for TES V: Skyrim."""
 
+from os.path import join as _j
 from .constants import *
 from .default_tweaks import default_tweaks
 from .. import GameInfo
@@ -39,7 +40,7 @@ class SkyrimGameInfo(GameInfo):
     launch_exe = u'TESV.exe'
     masterFiles = [u'Skyrim.esm', u'Update.esm']
     iniFiles = [u'Skyrim.ini', u'SkyrimPrefs.ini']
-    pklfile = r'bash\db\Skyrim_ids.pkl'
+    pklfile = _j('bash', 'db' 'Skyrim_ids.pkl')
     regInstallKeys = (u'Bethesda Softworks\\Skyrim', u'Installed Path')
     nexusUrl = u'https://www.nexusmods.com/skyrim/'
     nexusName = u'Skyrim Nexus'

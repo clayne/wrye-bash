@@ -23,6 +23,7 @@
 # =============================================================================
 """GameInfo override for Fallout 4."""
 
+from os.path import join as _j
 from .constants import *
 from .default_tweaks import default_tweaks
 from .. import GameInfo
@@ -37,7 +38,7 @@ class Fallout4GameInfo(GameInfo):
     launch_exe = u'Fallout4.exe'
     masterFiles = [u'Fallout4.esm']
     iniFiles = [u'Fallout4.ini', u'Fallout4Prefs.ini', u'Fallout4Custom.ini', ]
-    pklfile = ur'bash\db\Fallout4_ids.pkl'
+    pklfile = _j(u'bash', u'db', u'Fallout4_ids.pkl')
     regInstallKeys = (u'Bethesda Softworks\\Fallout4', u'Installed Path')
     nexusUrl = u'https://www.nexusmods.com/fallout4/'
     nexusName = u'Fallout 4 Nexus'
