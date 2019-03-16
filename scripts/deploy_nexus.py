@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 import os
 import re
 from contextlib import closing, contextmanager
@@ -11,6 +12,10 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import Select, WebDriverWait
+
+import utils
+
+LOGGER = logging.getLogger(__name__)
 
 COOKIES_TEMPLATE = {
     "pass_hash": {
@@ -72,7 +77,7 @@ DESC_DICT = {
     ),
 }
 DRIVER_DOWNLOAD = (
-    "Download the {} driver from {} and place it in this script's folder.\n"
+    "Download the {} driver from {} and place it in PATH.\n"
     "Press Enter to continue..."
 )
 CATEGORY = "Updates"
@@ -163,7 +168,9 @@ def setup_driver(driver_name):
         options = webdriver.ChromeOptions()
         options.add_argument("--ignore-certificate-errors")
         options.add_argument("--ignore-ssl-errors")
-        return webdriver.Chrome(chrome_options=options)
+        driver = webdriver.Chrome(chrome_options=options)
+        LOGGER.debug("Successfully created a new chrome driver")
+        return driver
     elif driver_name == "firefox":
         while not check_executable("geckodriver.exe"):
             raw_input(
@@ -173,7 +180,9 @@ def setup_driver(driver_name):
             )
         profile = webdriver.FirefoxProfile()
         profile.accept_untrusted_certs = True
-        return webdriver.Firefox(firefox_profile=profile)
+        driver = webdriver.Firefox(firefox_profile=profile)
+        LOGGER.debug("Successfully created a new firefox driver")
+        return driver
     else:
         while not check_executable("MicrosoftWebDriver.exe"):
             raw_input(
@@ -185,7 +194,9 @@ def setup_driver(driver_name):
             )
         capabilities = webdriver.DesiredCapabilities().INTERNETEXPLORER
         capabilities["acceptSslCerts"] = True
-        return webdriver.Ie(capabilities=capabilities)
+        driver = webdriver.Ie(capabilities=capabilities)
+        LOGGER.debug("Successfully created a new edge driver")
+        return driver
 
 
 def load_cookies(driver, config):
@@ -198,13 +209,16 @@ def load_cookies(driver, config):
 
 
 def set_file_to_replace(driver, name):
-    xpath = "//div[@class='file-category']/h3[text()='Updates']/../ol/li"
+    LOGGER.debug("Looking for old files to replace...")
+    xpath = "//div[@class='file-category']/h3[text()='{}']/../ol/li".format(CATEGORY)
     file_entries = driver.find_elements_by_xpath(xpath)
     for entry in file_entries:
         fname_xpath = "div[@class='file-head']/h4"
         fname = entry.find_element_by_xpath(fname_xpath).text
+        LOGGER.debug("Checking file '{}'...".format(fname))
         if COMPILED_REGEX.match(fname) is None or not fname.endswith(name.split()[-1]):
             continue
+        LOGGER.debug("File '{}' has matched...".format(fname))
         fversion_xpath = "div[@class='file-head']/div/span"
         fversion = entry.find_element_by_xpath(fversion_xpath).text
         freplace = " ".join((fname, fversion))
@@ -213,11 +227,13 @@ def set_file_to_replace(driver, name):
             driver.find_element_by_id("select-original-file")
         ).select_by_visible_text(freplace)
         driver.find_element_by_id("remove-old-version").click()
+        LOGGER.info("Replacing file '{}'".format(freplace))
         break
 
 
 def upload_files(driver):
     for fname in os.listdir(DIST_PATH):
+        LOGGER.info("Uploading a new file...")
         fpath = os.path.join(DIST_PATH, fname)
         if not os.path.isfile(fpath):
             return
@@ -225,18 +241,22 @@ def upload_files(driver):
         version = name.split()[2]
         try:
             # handle cookies banner
+            LOGGER.debug("Removing cookies banner...")
             xpath = "//a[@class='banner_continue--2NyXA']"
             banner = WebDriverWait(driver, 5).until(
                 ec.element_to_be_clickable((By.XPATH, xpath))
             )
             banner.click()
         except TimeoutException:
-            pass
+            LOGGER.debug("Cookies banner not found.")
         # mod name
+        LOGGER.info("File name: '{}'".format(name))
         driver.find_element_by_name("name").send_keys(name)
         # mod version
+        LOGGER.info("File version: '{}'".format(version))
         driver.find_element_by_name("file-version").send_keys(version)
         # mod category
+        LOGGER.info("File category: '{}'".format(CATEGORY))
         Select(
             driver.find_element_by_id("select-file-category")
         ).select_by_visible_text(CATEGORY)
@@ -244,10 +264,12 @@ def upload_files(driver):
         set_file_to_replace(driver, name)
         # mod description
         mod_desc = next(value for key, value in DESC_DICT.iteritems() if key in fname)
+        LOGGER.info("File description: '{}'".format(repr(mod_desc)))
         driver.find_element_by_id("file-description").send_keys(mod_desc)
         # remove download with manager button
         driver.find_element_by_id("option-dlbutton").click()
         # upload the actual file
+        LOGGER.info("Uploading file '{}'...".format(fpath))
         driver.find_element_by_xpath("//input[@type='file']").send_keys(fpath)
         # Will wait 1 hour for file upload - no point in doing timeouts if goal is ci
         WebDriverWait(driver, 3600).until(
@@ -256,6 +278,7 @@ def upload_files(driver):
                 fname + " has been uploaded.",
             )
         )
+        LOGGER.debug("Upload finished.")
         # page will auto refresh after "saving" the new file
         with wait_for_page_load(driver):
             driver.find_element_by_xpath(
@@ -272,6 +295,7 @@ def upload_files(driver):
 
 
 def main(args):
+    utils.setup_log(LOGGER, verbosity=args.verbosity, logfile=args.logfile)
     config = parse_config(args)
     driver = setup_driver(config["driver"])
     driver.maximize_window()
@@ -287,9 +311,8 @@ def main(args):
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
+    utils.setup_deploy_parser(argparser)
     setup_parser(argparser)
-    argparser.add_argument(
-        "--no-config", help="Do not save to a config file.", action="store_true"
-    )
     parsed_args = argparser.parse_args()
+    open(parsed_args.logfile, "w").close()
     main(parsed_args)

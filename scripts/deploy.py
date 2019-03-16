@@ -39,14 +39,13 @@ import argparse
 
 import deploy_dropbox
 import deploy_nexus
+import utils
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument(
-        "--no-config", help="Do not save to a config file.", action="store_true"
-    )
+    utils.setup_deploy_parser(parser)
     subparser = parser.add_subparsers(title="subcommands", dest="subcommand")
     sub_dropbox = subparser.add_parser("dropbox", help="Upload nightly to dropbox")
     deploy_dropbox.setup_parser(sub_dropbox)
@@ -58,6 +57,7 @@ if __name__ == "__main__":
     nexus_group = sub_all.add_argument_group("nexus arguments")
     deploy_nexus.setup_parser(nexus_group)
     args = parser.parse_args()
+    open(args.logfile, "w").close()
     if args.subcommand in ("dropbox", "all"):
         deploy_dropbox.main(args)
     if args.subcommand in ("nexus", "all"):

@@ -2,10 +2,15 @@
 
 import argparse
 import json
+import logging
 import os
 import re
 
 import dropbox
+
+import utils
+
+LOGGER = logging.getLogger(__name__)
 
 # constants
 SHARED_FOLDER_ID = "4796182912"
@@ -67,36 +72,42 @@ def parse_config(args):
 
 
 def remove_files(dbx, path):
+    LOGGER.info("Removing previous files...")
     # get all files in folder
     files = []
     for entry in dbx.files_list_folder(path).entries:
         if isinstance(entry, dropbox.files.FileMetadata):
             files.append(entry.name)
+            LOGGER.debug("Found '{}' under shared folder.".format(entry.name))
     # delete the previous nightly files
     filtered = filter(COMPILED.match, files)
     for fname in filtered:
         fpath = path + "/" + fname
-        print "Removing {}...".format(fpath)
+        LOGGER.info("Removing '{}'...".format(fname))
         dbx.files_delete_v2(fpath)
 
 
 def upload_files(dbx, path):
+    LOGGER.info("Uploading new distributables...")
     # upload new nightly
     for fname in os.listdir(DIST_PATH):
         fpath = os.path.join(DIST_PATH, fname)
         if not os.path.isfile(fpath):
             continue
+        LOGGER.debug("Found '{}' under distributable folder.".format(fname))
         upload_path = path + "/" + fname
         with open(fpath, "rb") as fopen:
-            print "Uploading {} to {}...".format(fpath, upload_path)
+            LOGGER.info("Uploading '{}'...".format(fpath))
             dbx.files_upload(fopen.read(), upload_path)
 
 
 def main(args):
+    utils.setup_log(LOGGER, verbosity=args.verbosity, logfile=args.logfile)
     config = parse_config(args)
     # setup dropbox instance
     dbx = dropbox.Dropbox(config["access_token"])
     shared_folder_path = dbx.sharing_get_folder_metadata(SHARED_FOLDER_ID).path_lower
+    LOGGER.debug("Found shared folder path at '{}'.".format(shared_folder_path))
     # create folder inside shared folder if needed for branch nightly
     if config["branch"]:
         shared_folder_path += "/" + config["branch"]
@@ -104,15 +115,19 @@ def main(args):
             dbx.files_create_folder_v2(shared_folder_path)
         except dropbox.exceptions.ApiError:
             pass
+        LOGGER.debug(
+            "Using branch folder '{}' at '{}'.".format(
+                config["branch"], shared_folder_path
+            )
+        )
     remove_files(dbx, shared_folder_path)
     upload_files(dbx, shared_folder_path)
 
 
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
+    utils.setup_deploy_parser(argparser)
     setup_parser(argparser)
-    argparser.add_argument(
-        "--no-config", help="Do not save to a config file.", action="store_true"
-    )
     parsed_args = argparser.parse_args()
+    open(parsed_args.logfile, "w").close()
     main(parsed_args)

@@ -30,6 +30,9 @@ import subprocess
 import sys
 import urllib2
 
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+DEPLOY_LOG = os.path.join(ROOT_PATH, "deploy.log")
+
 
 # verbosity:
 #  quiet (warnings and above)
@@ -69,6 +72,16 @@ def setup_common_parser(parser):
         help="Do not print any output to console.",
     )
     parser.set_defaults(verbosity=logging.INFO)
+
+
+def setup_deploy_parser(parser):
+    setup_common_parser(parser)
+    parser.add_argument(
+        "-l", "--logfile", default=DEPLOY_LOG, help="Where to store the deployment log."
+    )
+    parser.add_argument(
+        "--no-config", help="Do not save arguments to a config file.", action="store_true"
+    )
 
 
 def convert_bytes(size_bytes):
