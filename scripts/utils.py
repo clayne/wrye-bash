@@ -80,7 +80,10 @@ def setup_deploy_parser(parser):
         "-l", "--logfile", default=DEPLOY_LOG, help="Where to store the deployment log."
     )
     parser.add_argument(
-        "--no-config", help="Do not save arguments to a config file.", action="store_true"
+        "--no-config", action="store_true", help="Do not save arguments to a config file."
+    )
+    parser.add_argument(
+        "-n", "--dry-run", action="store_true", help='Perform a dry run.'
     )
 
 

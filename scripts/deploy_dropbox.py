@@ -71,7 +71,7 @@ def parse_config(args):
     return default_dict
 
 
-def remove_files(dbx, path):
+def remove_files(dbx, path, dry_run=False):
     LOGGER.info("Removing previous files...")
     # get all files in folder
     files = []
@@ -83,11 +83,14 @@ def remove_files(dbx, path):
     filtered = filter(COMPILED.match, files)
     for fname in filtered:
         fpath = path + "/" + fname
-        LOGGER.info("Removing '{}'...".format(fname))
+        if dry_run:
+            LOGGER.info("Would remove '{}'.".format(fpath))
+            continue
+        LOGGER.info("Removing '{}'...".format(fpath))
         dbx.files_delete_v2(fpath)
 
 
-def upload_files(dbx, path):
+def upload_files(dbx, path, dry_run=False):
     LOGGER.info("Uploading new distributables...")
     # upload new nightly
     for fname in os.listdir(DIST_PATH):
@@ -96,8 +99,13 @@ def upload_files(dbx, path):
             continue
         LOGGER.debug("Found '{}' under distributable folder.".format(fname))
         upload_path = path + "/" + fname
+        if dry_run:
+            LOGGER.info(
+                "Would upload '{}'.".format(os.path.relpath(fpath, os.getcwd()))
+            )
+            continue
+        LOGGER.info("Uploading '{}'...".format(os.path.relpath(fpath, os.getcwd())))
         with open(fpath, "rb") as fopen:
-            LOGGER.info("Uploading '{}'...".format(fpath))
             dbx.files_upload(fopen.read(), upload_path)
 
 
@@ -120,8 +128,8 @@ def main(args):
                 config["branch"], shared_folder_path
             )
         )
-    remove_files(dbx, shared_folder_path)
-    upload_files(dbx, shared_folder_path)
+    remove_files(dbx, shared_folder_path, args.dry_run)
+    upload_files(dbx, shared_folder_path, args.dry_run)
 
 
 if __name__ == "__main__":

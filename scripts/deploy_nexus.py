@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+import textwrap
 from contextlib import closing, contextmanager
 
 from selenium import webdriver
@@ -208,7 +209,7 @@ def load_cookies(driver, config):
         driver.add_cookie(cookie)
 
 
-def set_file_to_replace(driver, name):
+def set_file_to_replace(driver, name, dry_run=False):
     LOGGER.debug("Looking for old files to replace...")
     xpath = "//div[@class='file-category']/h3[text()='{}']/../ol/li".format(CATEGORY)
     file_entries = driver.find_elements_by_xpath(xpath)
@@ -222,16 +223,19 @@ def set_file_to_replace(driver, name):
         fversion_xpath = "div[@class='file-head']/div/span"
         fversion = entry.find_element_by_xpath(fversion_xpath).text
         freplace = " ".join((fname, fversion))
+        if dry_run:
+            LOGGER.info("Would replace file '{}'.".format(freplace))
+            break
+        LOGGER.info("Replacing file '{}'...".format(freplace))
         driver.find_element_by_id("new-existing-version").click()
         Select(
             driver.find_element_by_id("select-original-file")
         ).select_by_visible_text(freplace)
         driver.find_element_by_id("remove-old-version").click()
-        LOGGER.info("Replacing file '{}'".format(freplace))
         break
 
 
-def upload_files(driver):
+def upload_files(driver, dry_run=False):
     for fname in os.listdir(DIST_PATH):
         LOGGER.info("Uploading a new file...")
         fpath = os.path.join(DIST_PATH, fname)
@@ -251,25 +255,40 @@ def upload_files(driver):
             LOGGER.debug("Cookies banner not found.")
         # mod name
         LOGGER.info("File name: '{}'".format(name))
-        driver.find_element_by_name("name").send_keys(name)
+        if not dry_run:
+            driver.find_element_by_name("name").send_keys(name)
         # mod version
         LOGGER.info("File version: '{}'".format(version))
-        driver.find_element_by_name("file-version").send_keys(version)
+        if not dry_run:
+            driver.find_element_by_name("file-version").send_keys(version)
         # mod category
         LOGGER.info("File category: '{}'".format(CATEGORY))
-        Select(
-            driver.find_element_by_id("select-file-category")
-        ).select_by_visible_text(CATEGORY)
+        if not dry_run:
+            Select(
+                driver.find_element_by_id("select-file-category")
+            ).select_by_visible_text(CATEGORY)
         # check if it is necessary to replace a previous file
-        set_file_to_replace(driver, name)
+        set_file_to_replace(driver, name, dry_run)
         # mod description
         mod_desc = next(value for key, value in DESC_DICT.iteritems() if key in fname)
-        LOGGER.info("File description: '{}'".format(repr(mod_desc)))
-        driver.find_element_by_id("file-description").send_keys(mod_desc)
+        LOGGER.info("File description:")
+        LOGGER.info(
+            textwrap.fill(mod_desc, initial_indent="  ", subsequent_indent="  ")
+        )
+        if not dry_run:
+            driver.find_element_by_id("file-description").send_keys(mod_desc)
         # remove download with manager button
-        driver.find_element_by_id("option-dlbutton").click()
+        if not dry_run:
+            driver.find_element_by_id("option-dlbutton").click()
         # upload the actual file
-        LOGGER.info("Uploading file '{}'...".format(fpath))
+        if dry_run:
+            LOGGER.info(
+                "Would upload file '{}'.".format(os.path.relpath(fpath, os.getcwd()))
+            )
+            continue
+        LOGGER.info(
+            "Uploading file '{}'...".format(os.path.relpath(fpath, os.getcwd()))
+        )
         driver.find_element_by_xpath("//input[@type='file']").send_keys(fpath)
         # Will wait 1 hour for file upload - no point in doing timeouts if goal is ci
         WebDriverWait(driver, 3600).until(
@@ -306,7 +325,7 @@ def main(args):
                 "https://www.nexusmods.com/mods/"
                 "edit/?step=files&id={}&game_id={}".format(mod_id, game_id)
             )
-            upload_files(driver)
+            upload_files(driver, args.dry_run)
 
 
 if __name__ == "__main__":
