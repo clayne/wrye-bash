@@ -46,19 +46,26 @@ if __name__ == "__main__":
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     utils.setup_deploy_parser(parser)
-    subparser = parser.add_subparsers(title="subcommands", dest="subcommand")
-    sub_dropbox = subparser.add_parser("dropbox", help="Upload nightly to dropbox")
-    deploy_dropbox.setup_parser(sub_dropbox)
-    sub_nexus = subparser.add_parser("nexus", help="Upload nightly to nexus")
-    deploy_nexus.setup_parser(sub_nexus)
-    sub_all = subparser.add_parser("all", help="Upload nightly to all targets above")
-    dropbox_group = sub_all.add_argument_group("dropbox arguments")
-    deploy_dropbox.setup_parser(dropbox_group)
-    nexus_group = sub_all.add_argument_group("nexus arguments")
-    deploy_nexus.setup_parser(nexus_group)
+    parser.add_argument(
+        "--no-dropbox",
+        action="store_false",
+        dest="dropbox",
+        help="Do not deploy to dropbox.",
+    )
+    parser.add_argument(
+        "--no-nexus",
+        action="store_false",
+        dest="nexus",
+        help="Do not deploy to nexusmods.",
+    )
+    dropbox_parser = parser.add_argument_group("dropbox arguments")
+    deploy_dropbox.setup_parser(dropbox_parser)
+    nexus_parser = parser.add_argument_group("nexus arguments")
+    deploy_nexus.setup_parser(nexus_parser)
     args = parser.parse_args()
     open(args.logfile, "w").close()
-    if args.subcommand in ("dropbox", "all"):
+    if args.dropbox:
         deploy_dropbox.main(args)
-    if args.subcommand in ("nexus", "all"):
+        print
+    if args.nexus:
         deploy_nexus.main(args)

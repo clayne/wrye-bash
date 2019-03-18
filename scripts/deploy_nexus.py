@@ -63,18 +63,16 @@ ID_DICT = {
 }
 DESC_DICT = {
     "Installer": (
-        "Executable automated Installer. This will by default install "
-        "just the Standalone Wrye Bash. It can also install all "
-        "requirements for a full Python setup if you have any plans to "
-        "join in with development."
+        "Executable automated Installer. This will by default install just "
+        "the Standalone Wrye Bash. It can also install all requirements for a "
+        "full Python setup if you have any plans to join in with development."
     ),
     "Python Source": (
-        "This is a manual installation of Wrye Bash Python files, "
-        "requiring the full Python setup files to also be manually "
-        "installed first."
+        "This is a manual installation of Wrye Bash Python files, requiring "
+        "the full Python setup files to also be manually installed first."
     ),
     "Standalone Executable": (
-        "This is a manual installation of the Wrye Bash " "Standalone files."
+        "This is a manual installation of the Wrye Bash Standalone files."
     ),
 }
 DRIVER_DOWNLOAD = (
