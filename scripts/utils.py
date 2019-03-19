@@ -23,6 +23,7 @@
 #
 # =============================================================================
 
+import json
 import logging
 import math
 import os
@@ -32,6 +33,7 @@ import urllib2
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 DEPLOY_LOG = os.path.join(ROOT_PATH, "deploy.log")
+DEPLOY_CONFIG = os.path.join(ROOT_PATH, "deploy_config.json")
 
 
 # verbosity:
@@ -80,11 +82,34 @@ def setup_deploy_parser(parser):
         "-l", "--logfile", default=DEPLOY_LOG, help="Where to store the deployment log."
     )
     parser.add_argument(
-        "--no-config", action="store_true", help="Do not save arguments to a config file."
+        "--no-config",
+        action="store_false",
+        dest="save_config",
+        help="Do not save arguments to a config file.",
     )
     parser.add_argument(
-        "-n", "--dry-run", action="store_true", help='Perform a dry run.'
+        "-n", "--dry-run", action="store_true", help="Perform a dry run."
     )
+
+
+def parse_deploy_credentials(cli_args, required_creds, save_config=True):
+    if os.path.isfile(DEPLOY_CONFIG):
+        with open(DEPLOY_CONFIG, "r") as conf_file:
+            file_dict = json.load(conf_file)
+    else:
+        file_dict = {}
+    cli_dict = vars(cli_args)
+    final_dict = {a: None for a in required_creds}
+    final_dict.update(file_dict)
+    final_dict.update({a: b for a, b in cli_dict.iteritems() if a in required_creds})
+    for key, value in final_dict.iteritems():
+        if value is None:
+            print "No {} specified, please enter it now:".format(key)
+            value = raw_input("> ")
+    if save_config:
+        with open(DEPLOY_CONFIG, "w") as conf_file:
+            json.dump(final_dict, conf_file, indent=2, separators=(",", ": "))
+    return final_dict
 
 
 def convert_bytes(size_bytes):

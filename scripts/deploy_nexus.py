@@ -9,7 +9,11 @@ import textwrap
 from contextlib import closing, contextmanager
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import (
+    ElementClickInterceptedException,
+    ElementNotInteractableException,
+    TimeoutException,
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import Select, WebDriverWait
@@ -49,7 +53,7 @@ COOKIES_TEMPLATE = {
 }
 ID_DICT = {
     # oblivion
-    101: 22369,
+    101: 22368,
     # skyrim
     110: 1840,
     # skyrim special edition
@@ -109,50 +113,29 @@ def wait_for_page_load(browser, timeout=30):
 
 def setup_parser(parser):
     parser.add_argument(
-        "-d", "--driver", help="Choose a browser to use: firefox, chrome or edge"
+        "-d",
+        "--driver",
+        default="firefox",
+        help="Choose a browser to use: firefox, chrome or edge [default: firefox].",
     )
     parser.add_argument(
         "-m",
         "--member-id",
+        default=argparse.SUPPRESS,
         help="The 'value' from the cookie 'member_id' in the domain 'nexusmods.com'",
     )
     parser.add_argument(
         "-p",
         "--pass-hash",
+        default=argparse.SUPPRESS,
         help="The 'value' from the cookie 'pass_hash' in the domain 'nexusmods.com'",
     )
     parser.add_argument(
         "-s",
         "--sid",
+        default=argparse.SUPPRESS,
         help="The 'value' from the cookie 'sid' in the domain 'nexusmods.com'",
     )
-
-
-def parse_config(args):
-    # the dict with "defaults"
-    default_dict = {"driver": None, "member_id": None, "pass_hash": None, "sid": None}
-    if os.path.isfile(CONFIG_FILE):
-        with open(CONFIG_FILE, "r") as conf_file:
-            file_dict = json.load(conf_file)
-    else:
-        file_dict = {}
-    for key in default_dict.keys():
-        # load the config file (json)
-        value = file_dict.get("nexus_" + key, None) or default_dict[key]
-        # load the environment variables - useful for ci deployment
-        value = os.environ.get("WRYE_BASH_" + key, None) or value
-        # load the cli arguments
-        value = args.__getattribute__(key) or value
-        # check for missing values
-        if value is None:
-            print "No {} specified, please enter it now:".format(key)
-            value = raw_input("> ")
-        default_dict[key] = value
-    if not args.no_config:
-        with open(CONFIG_FILE, "w") as conf_file:
-            file_dict.update({"nexus_" + a: b for a, b in default_dict.items()})
-            json.dump(file_dict, conf_file, indent=2, separators=(",", ": "))
-    return default_dict
 
 
 def setup_driver(driver_name):
@@ -198,10 +181,10 @@ def setup_driver(driver_name):
         return driver
 
 
-def load_cookies(driver, config):
+def load_cookies(driver, creds):
     cookies_dict = dict(COOKIES_TEMPLATE)
     for key, value in cookies_dict.items():
-        cookies_dict[key]["value"] = config[key]
+        cookies_dict[key]["value"] = creds[key]
     driver.get("https://www.nexusmods.com")
     for cookie in cookies_dict.values():
         driver.add_cookie(cookie)
@@ -249,7 +232,11 @@ def upload_files(driver, dry_run=False):
                 ec.element_to_be_clickable((By.XPATH, xpath))
             )
             banner.click()
-        except TimeoutException:
+        except (
+            TimeoutException,
+            ElementNotInteractableException,
+            ElementClickInterceptedException,
+        ):
             LOGGER.debug("Cookies banner not found.")
         # mod name
         LOGGER.info("File name: '{}'".format(name))
@@ -313,10 +300,12 @@ def upload_files(driver, dry_run=False):
 
 def main(args):
     utils.setup_log(LOGGER, verbosity=args.verbosity, logfile=args.logfile)
-    config = parse_config(args)
-    driver = setup_driver(config["driver"])
+    creds = utils.parse_deploy_credentials(
+        args, ["member_id", "pass_hash", "sid"], args.save_config
+    )
+    driver = setup_driver(args.driver)
     driver.maximize_window()
-    load_cookies(driver, config)
+    load_cookies(driver, creds)
     with closing(driver):
         for game_id, mod_id in ID_DICT.iteritems():
             driver.get(
