@@ -34,6 +34,7 @@ import urllib2
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 DEPLOY_LOG = os.path.join(ROOT_PATH, "deploy.log")
 DEPLOY_CONFIG = os.path.join(ROOT_PATH, "deploy_config.json")
+DIST_PATH = os.path.join(ROOT_PATH, "dist")
 
 
 # verbosity:
@@ -79,7 +80,12 @@ def setup_common_parser(parser):
 def setup_deploy_parser(parser):
     setup_common_parser(parser)
     parser.add_argument(
-        "-l", "--logfile", default=DEPLOY_LOG, help="Where to store the deployment log."
+        "-l",
+        "--logfile",
+        default=DEPLOY_LOG,
+        help="Where to store the deployment log [default: {}].".format(
+            os.path.relpath(DEPLOY_LOG, os.getcwd())
+        ),
     )
     parser.add_argument(
         "--no-config",
@@ -89,6 +95,14 @@ def setup_deploy_parser(parser):
     )
     parser.add_argument(
         "-n", "--dry-run", action="store_true", help="Perform a dry run."
+    )
+    parser.add_argument(
+        "-f",
+        "--dist-folder",
+        default=DIST_PATH,
+        dest="dist_folder",
+        help="Specifies the folder with the distributables to deploy "
+        "[default: {}].".format(os.path.relpath(DIST_PATH, os.getcwd())),
     )
 
 

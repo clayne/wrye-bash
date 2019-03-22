@@ -15,9 +15,6 @@ LOGGER = logging.getLogger(__name__)
 # constants
 SHARED_FOLDER_ID = "4796182912"
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(ROOT_FOLDER, "deploy_config.json")
-DIST_PATH = os.path.join(ROOT_FOLDER, "dist")
-assert os.path.isdir(DIST_PATH), "You don't have any files to upload."
 
 # regex
 FILE_REGEX = r"Wrye Bash \d{3,}\.\d{12,12} - (Installer.exe|Python Source.7z|Standalone Executable.7z)"
@@ -45,7 +42,6 @@ def setup_parser(parser):
 
 
 def remove_files(dbx, path, dry_run=False):
-    LOGGER.info("Removing previous files...")
     # get all files in folder
     files = []
     for entry in dbx.files_list_folder(path).entries:
@@ -63,23 +59,16 @@ def remove_files(dbx, path, dry_run=False):
         dbx.files_delete_v2(fpath)
 
 
-def upload_files(dbx, path, dry_run=False):
-    LOGGER.info("Uploading new distributables...")
-    # upload new nightly
-    for fname in os.listdir(DIST_PATH):
-        fpath = os.path.join(DIST_PATH, fname)
-        if not os.path.isfile(fpath):
-            continue
-        LOGGER.debug("Found '{}' under distributable folder.".format(fname))
-        upload_path = path + "/" + fname
-        if dry_run:
-            LOGGER.info(
-                "Would upload '{}'.".format(os.path.relpath(fpath, os.getcwd()))
-            )
-            continue
-        LOGGER.info("Uploading '{}'...".format(os.path.relpath(fpath, os.getcwd())))
-        with open(fpath, "rb") as fopen:
-            dbx.files_upload(fopen.read(), upload_path)
+def upload_file(dbx, fpath, folder_path, dry_run=False):
+    fname = os.path.basename(fpath)
+    LOGGER.debug("Found '{}' under distributable folder.".format(fname))
+    if dry_run:
+        LOGGER.info("Would upload '{}'.".format(os.path.relpath(fpath, os.getcwd())))
+        return
+    LOGGER.info("Uploading '{}'...".format(os.path.relpath(fpath, os.getcwd())))
+    with open(fpath, "rb") as fopen:
+        upload_path = folder_path + "/" + fname
+        dbx.files_upload(fopen.read(), upload_path)
 
 
 def main(args):
@@ -100,7 +89,11 @@ def main(args):
             "Using branch folder '{}' at '{}'.".format(args.branch, shared_folder_path)
         )
     remove_files(dbx, shared_folder_path, args.dry_run)
-    upload_files(dbx, shared_folder_path, args.dry_run)
+    for fname in os.listdir(args.dist_folder):
+        fpath = os.path.join(args.dist_folder, fname)
+        if not os.path.isfile(fpath):
+            continue
+        upload_file(dbx, fpath, shared_folder_path, args.dry_run)
 
 
 if __name__ == "__main__":

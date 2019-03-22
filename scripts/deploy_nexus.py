@@ -86,10 +86,6 @@ DRIVER_DOWNLOAD = (
 CATEGORY = "Updates"
 
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
-CONFIG_FILE = os.path.join(ROOT_FOLDER, "deploy_config.json")
-DIST_PATH = os.path.join(ROOT_FOLDER, "dist")
-assert os.path.isdir(DIST_PATH), "You don't have any files to upload."
-
 FILE_REGEX = (
     r"Wrye Bash \d{3,}\.\d{12,12} - (Installer|Python Source|Standalone Executable)"
 )
@@ -216,86 +212,75 @@ def set_file_to_replace(driver, name, dry_run=False):
         break
 
 
-def upload_files(driver, dry_run=False):
-    for fname in os.listdir(DIST_PATH):
-        LOGGER.info("Uploading a new file...")
-        fpath = os.path.join(DIST_PATH, fname)
-        if not os.path.isfile(fpath):
-            return
-        name = os.path.splitext(fname)[0]
-        version = name.split()[2]
-        try:
-            # handle cookies banner
-            LOGGER.debug("Removing cookies banner...")
-            xpath = "//a[@class='banner_continue--2NyXA']"
-            banner = WebDriverWait(driver, 5).until(
-                ec.element_to_be_clickable((By.XPATH, xpath))
-            )
-            banner.click()
-        except (
-            TimeoutException,
-            ElementNotInteractableException,
-            ElementClickInterceptedException,
-        ):
-            LOGGER.debug("Cookies banner not found.")
-        # mod name
-        LOGGER.info("File name: '{}'".format(name))
-        if not dry_run:
-            driver.find_element_by_name("name").send_keys(name)
-        # mod version
-        LOGGER.info("File version: '{}'".format(version))
-        if not dry_run:
-            driver.find_element_by_name("file-version").send_keys(version)
-        # mod category
-        LOGGER.info("File category: '{}'".format(CATEGORY))
-        if not dry_run:
-            Select(
-                driver.find_element_by_id("select-file-category")
-            ).select_by_visible_text(CATEGORY)
-        # check if it is necessary to replace a previous file
-        set_file_to_replace(driver, name, dry_run)
-        # mod description
-        mod_desc = next(value for key, value in DESC_DICT.iteritems() if key in fname)
-        LOGGER.info("File description:")
+def upload_file(driver, fpath, dry_run=False):
+    fname = os.path.basename(fpath)
+    name = os.path.splitext(fname)[0]
+    version = name.split()[2]
+    try:
+        # handle cookies banner
+        LOGGER.debug("Removing cookies banner...")
+        xpath = "//a[@class='banner_continue--2NyXA']"
+        banner = WebDriverWait(driver, 5).until(
+            ec.element_to_be_clickable((By.XPATH, xpath))
+        )
+        banner.click()
+    except (
+        TimeoutException,
+        ElementNotInteractableException,
+        ElementClickInterceptedException,
+    ):
+        LOGGER.debug("Cookies banner not found.")
+    # mod name
+    LOGGER.info("File name: '{}'".format(name))
+    if not dry_run:
+        driver.find_element_by_name("name").send_keys(name)
+    # mod version
+    LOGGER.info("File version: '{}'".format(version))
+    if not dry_run:
+        driver.find_element_by_name("file-version").send_keys(version)
+    # mod category
+    LOGGER.info("File category: '{}'".format(CATEGORY))
+    if not dry_run:
+        Select(
+            driver.find_element_by_id("select-file-category")
+        ).select_by_visible_text(CATEGORY)
+    # check if it is necessary to replace a previous file
+    set_file_to_replace(driver, name, dry_run)
+    # mod description
+    mod_desc = next(value for key, value in DESC_DICT.iteritems() if key in name)
+    LOGGER.info("File description:")
+    LOGGER.info(textwrap.fill(mod_desc, initial_indent="  ", subsequent_indent="  "))
+    if not dry_run:
+        driver.find_element_by_id("file-description").send_keys(mod_desc)
+    # remove download with manager button
+    if not dry_run:
+        driver.find_element_by_id("option-dlbutton").click()
+    # upload the actual file
+    if dry_run:
         LOGGER.info(
-            textwrap.fill(mod_desc, initial_indent="  ", subsequent_indent="  ")
+            "Would upload file '{}'.".format(os.path.relpath(fpath, os.getcwd()))
         )
-        if not dry_run:
-            driver.find_element_by_id("file-description").send_keys(mod_desc)
-        # remove download with manager button
-        if not dry_run:
-            driver.find_element_by_id("option-dlbutton").click()
-        # upload the actual file
-        if dry_run:
-            LOGGER.info(
-                "Would upload file '{}'.".format(os.path.relpath(fpath, os.getcwd()))
-            )
-            continue
-        LOGGER.info(
-            "Uploading file '{}'...".format(os.path.relpath(fpath, os.getcwd()))
+        return
+    LOGGER.info("Uploading file '{}'...".format(os.path.relpath(fpath, os.getcwd())))
+    driver.find_element_by_xpath("//input[@type='file']").send_keys(fpath)
+    # Will wait 1 hour for file upload - no point in doing timeouts if goal is ci
+    WebDriverWait(driver, 3600).until(
+        ec.text_to_be_present_in_element(
+            (By.XPATH, "//div[@id='file_uploader']/p"), fname + " has been uploaded."
         )
-        driver.find_element_by_xpath("//input[@type='file']").send_keys(fpath)
-        # Will wait 1 hour for file upload - no point in doing timeouts if goal is ci
-        WebDriverWait(driver, 3600).until(
-            ec.text_to_be_present_in_element(
-                (By.XPATH, "//div[@id='file_uploader']/p"),
-                fname + " has been uploaded.",
-            )
-        )
-        LOGGER.debug("Upload finished.")
-        # page will auto refresh after "saving" the new file
-        with wait_for_page_load(driver):
-            driver.find_element_by_xpath(
-                "//div[@class='btn inline mod-add-file']"
-            ).click()
-        try:
-            # fixme XXX: check if nexus actually opens an ad page
-            tabs = driver.window_handles
-            driver.switch_to.window(tabs[1])  # sometimes nexus opens an ad page
-            driver.close()
-            driver.switch_to.window(tabs[0])
-        except IndexError:
-            pass  # python 2 does not have `suppress` - for shame
+    )
+    LOGGER.debug("Upload finished.")
+    # page will auto refresh after "saving" the new file
+    with wait_for_page_load(driver):
+        driver.find_element_by_xpath("//div[@class='btn inline mod-add-file']").click()
+    try:
+        # fixme XXX: check if nexus actually opens an ad page
+        tabs = driver.window_handles
+        driver.switch_to.window(tabs[1])  # sometimes nexus opens an ad page
+        driver.close()
+        driver.switch_to.window(tabs[0])
+    except IndexError:
+        pass  # python 2 does not have `suppress` - for shame
 
 
 def main(args):
@@ -309,10 +294,15 @@ def main(args):
     with closing(driver):
         for game_id, mod_id in ID_DICT.iteritems():
             driver.get(
-                "https://www.nexusmods.com/mods/"
-                "edit/?step=files&id={}&game_id={}".format(mod_id, game_id)
+                "https://www.nexusmods.com/mods/edit/?step=files"
+                "&id={}&game_id={}".format(mod_id, game_id)
             )
-            upload_files(driver, args.dry_run)
+            LOGGER.info("Uploading files for game {}.".format(game_id))
+            for fname in os.listdir(args.dist_folder):
+                fpath = os.path.join(args.dist_folder, fname)
+                if not os.path.isfile(fpath):
+                    continue
+                upload_file(driver, fpath, args.dry_run)
 
 
 if __name__ == "__main__":
