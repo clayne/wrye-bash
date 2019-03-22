@@ -21,18 +21,10 @@ To deploy to nexus you need:
   Chrome: chrome://settings/siteData
   Firefox: Shift+F9 when at nexusmods.com
 
-Check the relevant subcommands for what values you need.
-
 Unless '--no-config' is supplied, all values are saved to a
 configuration file at './deploy_config.json'. Values are
 stored as a dictionary with the format (keys in lowercase):
     '%SUBCOMMAND%_%ARGUMENT%': '%VALUE%'
-
-Besides the config file and the cli arguments, you can also
-provide the required values via environment variables. This
-is only recommended for integration with CI servers. These
-variables are in the format (keys in uppercase):
-    'WRYE_BASH_%ARGUMENT%'='%VALUE%'
 """
 
 import argparse
