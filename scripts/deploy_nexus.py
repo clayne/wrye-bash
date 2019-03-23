@@ -23,33 +23,13 @@ import utils
 LOGGER = logging.getLogger(__name__)
 
 COOKIES_TEMPLATE = {
-    "pass_hash": {
-        "domain": ".nexusmods.com",
-        "expiry": None,
-        "httpOnly": False,
-        "name": "pass_hash",
-        "path": "/",
-        "secure": True,
-        "value": None,
-    },
-    "member_id": {
-        "domain": ".nexusmods.com",
-        "expiry": None,
-        "httpOnly": False,
-        "name": "member_id",
-        "path": "/",
-        "secure": True,
-        "value": None,
-    },
-    "sid": {
-        "domain": ".nexusmods.com",
-        "expiry": None,
-        "httpOnly": False,
-        "name": "sid",
-        "path": "/",
-        "secure": True,
-        "value": None,
-    },
+    "domain": ".nexusmods.com",
+    "expiry": None,
+    "httpOnly": False,
+    "name": None,
+    "path": "/",
+    "secure": True,
+    "value": None,
 }
 ID_DICT = {
     # oblivion
@@ -84,8 +64,6 @@ DRIVER_DOWNLOAD = (
     "Press Enter to continue..."
 )
 CATEGORY = "Updates"
-
-ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 FILE_REGEX = (
     r"Wrye Bash \d{3,}\.\d{12,12} - (Installer|Python Source|Standalone Executable)"
 )
@@ -178,11 +156,14 @@ def setup_driver(driver_name):
 
 
 def load_cookies(driver, creds):
-    cookies_dict = dict(COOKIES_TEMPLATE)
-    for key, value in cookies_dict.items():
-        cookies_dict[key]["value"] = creds[key]
+    cookies = []
+    for name, value in creds.iteritems():
+        cookie = dict(COOKIES_TEMPLATE)
+        cookie['name'] = name
+        cookie['value'] = value
+        cookies.append(cookie)
     driver.get("https://www.nexusmods.com")
-    for cookie in cookies_dict.values():
+    for cookie in cookies:
         driver.add_cookie(cookie)
 
 

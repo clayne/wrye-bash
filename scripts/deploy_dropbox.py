@@ -14,9 +14,6 @@ LOGGER = logging.getLogger(__name__)
 
 # constants
 SHARED_FOLDER_ID = "4796182912"
-ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
-
-# regex
 FILE_REGEX = r"Wrye Bash \d{3,}\.\d{12,12} - (Installer.exe|Python Source.7z|Standalone Executable.7z)"
 COMPILED = re.compile(FILE_REGEX)
 
