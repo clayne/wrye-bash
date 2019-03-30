@@ -56,7 +56,6 @@ import utils
 
 try:
     import scandir
-
     _walkdir = scandir.walk
 except ImportError:
     _walkdir = os.walk
@@ -71,13 +70,11 @@ MOPY_PATH = os.path.join(ROOT_PATH, u"Mopy")
 APPS_PATH = os.path.join(MOPY_PATH, u"Apps")
 
 sys.path.insert(0, MOPY_PATH)
+from bash import bass
 try:
-    from bash import bass
     import loot_api
-
-    loot_api_installed = True
 except ImportError:
-    loot_api_installed = False
+    loot_api = None
 
 NSIS_VERSION = "3.04"
 if sys.platform.lower().startswith("linux"):
@@ -324,8 +321,7 @@ def get_non_repo_files(repo_files):
     mopy_files = (os.path.normpath(x) for x in mopy_files)
     # We can ignore .pyc and .pyo files, since the NSIS scripts skip those
     mopy_files = (
-        x
-        for x in mopy_files
+        x for x in mopy_files
         if os.path.splitext(x)[1].lower() not in (u".pyc", u".pyo")
     )
     # We can also ignore Wrye Bash.exe, for the same reason
@@ -687,7 +683,7 @@ def update_file_version(version):
 @contextmanager
 def handle_apps_folder():
     apps_present = os.path.isdir(APPS_PATH)
-    tmpdir = tempfile.mkdtemp()
+    tmpdir = apps_present and tempfile.mkdtemp()
     if apps_present:
         LOGGER.debug("Moving Apps folder to {}".format(tmpdir))
         shutil.move(APPS_PATH, tmpdir)
@@ -698,9 +694,9 @@ def handle_apps_folder():
         if apps_present:
             for lnk in glob.glob(os.path.join(tmpdir, u"Apps", u"*")):
                 shutil.copy(lnk, os.path.join(MOPY_PATH, u"Apps"))
+            rm(tmpdir)
         else:
             rm(APPS_PATH)
-        rm(tmpdir)
 
 
 @contextmanager
@@ -761,12 +757,12 @@ def main(args):
 
 
 if __name__ == "__main__":
-    argparser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
-    )
+    argparser = argparse.ArgumentParser(description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    # TODO (ut) there is an ArgumentDefaultsHelpFormatter that we may consider
     utils.setup_common_parser(argparser)
     setup_parser(argparser)
-    if not loot_api_installed:
+    if loot_api is None:
         loot_group = argparser.add_argument_group(
             title="loot api arguments",
             description="LOOT API could not be found and will be installed.",
@@ -774,7 +770,7 @@ if __name__ == "__main__":
         install_loot_api.setup_parser(loot_group)
     parsed_args = argparser.parse_args()
     open(parsed_args.logfile, "w").close()
-    if not loot_api_installed:
+    if loot_api is None:
         install_loot_api.main(parsed_args)
         print
     main(parsed_args)
