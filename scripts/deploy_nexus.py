@@ -182,8 +182,8 @@ def load_cookies(driver, creds):
     cookies = []
     for name, value in creds.iteritems():
         cookie = dict(COOKIES_TEMPLATE)
-        cookie['name'] = name
-        cookie['value'] = value
+        cookie["name"] = name
+        cookie["value"] = value
         cookies.append(cookie)
     driver.get("https://www.nexusmods.com")
     for cookie in cookies:
@@ -277,14 +277,6 @@ def upload_file(driver, fpath, dry_run=False):
     # page will auto refresh after "saving" the new file
     with wait_for_page_load(driver):
         driver.find_element_by_xpath("//div[@class='btn inline mod-add-file']").click()
-    try:
-        # fixme XXX: check if nexus actually opens an ad page
-        tabs = driver.window_handles
-        driver.switch_to.window(tabs[1])  # sometimes nexus opens an ad page
-        driver.close()
-        driver.switch_to.window(tabs[0])
-    except IndexError:
-        pass  # python 2 does not have `suppress` - for shame
 
 
 def main(args):
