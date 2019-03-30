@@ -47,7 +47,7 @@ LOGGER = logging.getLogger(__name__)
 
 COOKIES_TEMPLATE = {
     "domain": ".nexusmods.com",
-    "expiry": None,
+    "expires": None,
     "httpOnly": False,
     "name": None,
     "path": "/",
@@ -112,8 +112,8 @@ def setup_parser(parser):
     parser.add_argument(
         "-d",
         "--driver",
-        default="firefox",
-        help="Choose a browser to use: firefox, chrome or edge [default: firefox].",
+        default="chrome",
+        help="Choose a browser to use: chrome or edge [default: chrome].",
     )
     parser.add_argument(
         "-m",
@@ -149,18 +149,6 @@ def setup_driver(driver_name):
         options.add_argument("--ignore-ssl-errors")
         driver = webdriver.Chrome(chrome_options=options)
         LOGGER.debug("Successfully created a new chrome driver")
-        return driver
-    elif driver_name == "firefox":
-        while not check_executable("geckodriver.exe"):
-            raw_input(
-                DRIVER_DOWNLOAD.format(
-                    "firefox", "https://github.com/mozilla/geckodriver/releases/latest"
-                )
-            )
-        profile = webdriver.FirefoxProfile()
-        profile.accept_untrusted_certs = True
-        driver = webdriver.Firefox(firefox_profile=profile)
-        LOGGER.debug("Successfully created a new firefox driver")
         return driver
     else:
         while not check_executable("MicrosoftWebDriver.exe"):
