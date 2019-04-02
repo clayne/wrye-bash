@@ -1954,7 +1954,7 @@ class SaveDetails(_SashDetailsPanel):
             self.gameDays = saveInfo.header.gameDays
             self.playMinutes = saveInfo.header.gameTicks/60000
             self.playerLevel = saveInfo.header.pcLevel
-            self.coSaves = u'%s\n%s' % saveInfo.get_cosave_tags()
+            self.coSaves = saveInfo.get_cosave_tags()
         #--Set Fields
         self.file.SetValue(self.fileStr)
         self._set_player_info_label()
