@@ -70,9 +70,8 @@ ID_DICT = {
 }
 DESC_DICT = {
     "Installer": (
-        "Executable automated Installer. This will by default install just "
-        "the Standalone Wrye Bash. It can also install all requirements for a "
-        "full Python setup if you have any plans to join in with development."
+        "Executable automated Installer. This will by "
+        "default install just the Standalone Wrye Bash."
     ),
     "Python Source": (
         "This is a manual installation of Wrye Bash Python files, requiring "
@@ -82,6 +81,10 @@ DESC_DICT = {
         "This is a manual installation of the Wrye Bash Standalone files."
     ),
 }
+DESC_ADDON = (
+    " This is the latest development version fixing many bugs and "
+    "adding new features - use this in preference to the main files."
+)
 DRIVER_DOWNLOAD = (
     "Download the {} driver from {} and place it in PATH.\n"
     "Press Enter to continue..."
@@ -192,15 +195,19 @@ def set_file_to_replace(driver, name, dry_run=False):
         fversion_xpath = "div[@class='file-head']/div/span"
         fversion = entry.find_element_by_xpath(fversion_xpath).text
         freplace = " ".join((fname, fversion))
-        if dry_run:
-            LOGGER.info("Would replace file '{}'.".format(freplace))
-            break
-        LOGGER.info("Replacing file '{}'...".format(freplace))
         driver.find_element_by_id("new-existing-version").click()
-        Select(
-            driver.find_element_by_id("select-original-file")
-        ).select_by_visible_text(freplace)
+        select_elem = Select(driver.find_element_by_id("select-original-file"))
+        select_elem.select_by_visible_text(freplace)
         driver.find_element_by_id("remove-old-version").click()
+        actual_file = select_elem.first_selected_option.text
+        LOGGER.info(
+            "{} file '{}'...".format(
+                "Would replace" if dry_run else "Replacing", actual_file
+            )
+        )
+        assert actual_file == freplace, (
+            "File to replace was not properly selected. Expected: " + freplace
+        )
         break
 
 
@@ -223,35 +230,50 @@ def upload_file(driver, fpath, dry_run=False):
     ):
         LOGGER.debug("Cookies banner not found.")
     # mod name
-    LOGGER.info("File name: '{}'".format(name))
-    if not dry_run:
-        driver.find_element_by_name("name").send_keys(name)
+    mod_name_elem = driver.find_element_by_name("name")
+    mod_name_elem.send_keys(name)
+    actual_name = mod_name_elem.get_attribute("value")
+    LOGGER.info("File name: '{}'".format(actual_name))
+    assert actual_name == name, "Mod name was not correctly set. Expected: " + name
     # mod version
-    LOGGER.info("File version: '{}'".format(version))
-    if not dry_run:
-        driver.find_element_by_name("file-version").send_keys(version)
+    mod_version_elem = driver.find_element_by_name("file-version")
+    mod_version_elem.send_keys(version)
+    actual_version = mod_version_elem.get_attribute("value")
+    LOGGER.info("File version: '{}'".format(actual_version))
+    assert actual_version == version, (
+        "Mod version was not correctly set. Expected: " + version
+    )
     # mod category
-    LOGGER.info("File category: '{}'".format(CATEGORY))
-    if not dry_run:
-        Select(
-            driver.find_element_by_id("select-file-category")
-        ).select_by_visible_text(CATEGORY)
+    category_select = Select(driver.find_element_by_id("select-file-category"))
+    category_select.select_by_visible_text(CATEGORY)
+    actual_category = category_select.first_selected_option.text
+    LOGGER.info("File category: '{}'".format(actual_category))
+    assert actual_category == CATEGORY, (
+        "Mod category was not correctly selected. Expected: " + CATEGORY
+    )
     # check if it is necessary to replace a previous file
     set_file_to_replace(driver, name, dry_run)
     # mod description
     mod_desc = next(value for key, value in DESC_DICT.iteritems() if key in name)
+    mod_desc += DESC_ADDON
+    mod_desc_elem = driver.find_element_by_id("file-description")
+    mod_desc_elem.send_keys(mod_desc)
+    actual_desc = mod_desc_elem.get_attribute("value")
     LOGGER.info("File description:")
-    LOGGER.info(textwrap.fill(mod_desc, initial_indent="  ", subsequent_indent="  "))
-    if not dry_run:
-        driver.find_element_by_id("file-description").send_keys(mod_desc)
+    LOGGER.info(textwrap.fill(actual_desc, initial_indent="  ", subsequent_indent="  "))
+    assert actual_desc == mod_desc, (
+        "Mod description was not correctly set. Expected:\n"
+        + textwrap.fill(mod_desc, initial_indent="  ", subsequent_indent="  ")
+    )
     # remove download with manager button
-    if not dry_run:
-        driver.find_element_by_id("option-dlbutton").click()
+    driver.find_element_by_id("option-dlbutton").click()
     # upload the actual file
     if dry_run:
         LOGGER.info(
             "Would upload file '{}'.".format(os.path.relpath(fpath, os.getcwd()))
         )
+        driver.refresh()
+        driver.switch_to_alert().accept()
         return
     LOGGER.info("Uploading file '{}'...".format(os.path.relpath(fpath, os.getcwd())))
     driver.find_element_by_xpath("//input[@type='file']").send_keys(fpath)
