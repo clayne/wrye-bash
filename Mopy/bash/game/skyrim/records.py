@@ -175,8 +175,8 @@ class MelBounds(MelStruct):
 #------------------------------------------------------------------------------
 class MelCoed(MelOptStruct):
     """Needs custom unpacker to look at FormID type of owner.  If owner is an
-	NPC then it is followed by a FormID.  If owner is a faction then it is
-	followed by an signed integer or '=Iif' instead of '=IIf' """ # see #282
+    NPC then it is followed by a FormID.  If owner is a faction then it is
+    followed by an signed integer or '=Iif' instead of '=IIf' """ # see #282
     def __init__(self):
         MelOptStruct.__init__(self,'COED','=IIf',(FID,'owner'),(FID,'glob'),
                               'itemCondition')
@@ -2144,9 +2144,8 @@ class MreDebr(MelRecord):
 
 # Verified for 305
 #------------------------------------------------------------------------------
-class MreDial(MelRecord):
+class MreDial(brec.MreDial):
     """Dialogue Records"""
-    classType = 'DIAL'
 
     # DATA has wbEnum in TES5Edit
     # Assigned to 'subtype' for WB
@@ -2181,53 +2180,6 @@ class MreDial(MelRecord):
         MelStruct('TIFC','I','infoCount',),
         )
     __slots__ = melSet.getSlotsUsed() + ['infoStamp','infoStamp2','infos']
-
-    def __init__(self, header, ins=None, do_unpack=False):
-        """Initialize."""
-        MelRecord.__init__(self, header, ins, do_unpack)
-        self.infoStamp = 0 #--Stamp for info GRUP
-        self.infoStamp2 = 0 #--Stamp for info GRUP
-        self.infos = []
-
-    def loadInfos(self,ins,endPos,infoClass):
-        """Load infos from ins. Called from MobDials."""
-        infos = self.infos
-        recHead = ins.unpackRecHeader
-        infosAppend = infos.append
-        while not ins.atEnd(endPos,'INFO Block'):
-            #--Get record info and handle it
-            header = recHead()
-            recType = header[0]
-            if recType == 'INFO':
-                info = infoClass(header,ins,True)
-                infosAppend(info)
-            else:
-                raise ModError(ins.inName, _('Unexpected %s record in %s group.')
-                    % (recType,"INFO"))
-
-    def dump(self,out):
-        """Dumps self., then group header and then records."""
-        MreRecord.dump(self,out)
-        if not self.infos: return
-        # Magic number '24': size of Skyrim's record header
-        # Magic format '4sIIIII': format for Skyrim's GRUP record
-        dial_size = 24 + sum([24 + info.getSize() for info in self.infos])
-        out.pack('4sIIIII', 'GRUP', dial_size, self.fid, 7, self.infoStamp,
-                 self.infoStamp2)
-        for info in self.infos: info.dump(out)
-
-    def updateMasters(self,masters):
-        """Updates set of master names according to masters actually used."""
-        MelRecord.updateMasters(self,masters)
-        for info in self.infos:
-            info.updateMasters(masters)
-
-    def convertFids(self,mapper,toLong):
-        """Converts fids between formats according to mapper.
-        toLong should be True if converting to long format or False if converting to short format."""
-        MelRecord.convertFids(self,mapper,toLong)
-        for info in self.infos:
-            info.convertFids(mapper,toLong)
 
 # Verified for 305
 #------------------------------------------------------------------------------
