@@ -486,7 +486,7 @@ class MelString16(MelString):
         if value is not None:
             if self.maxSize:
                 value = winNewLines(value.rstrip())
-                size = min(self.maxSize,len(value))
+                str_size = min(self.maxSize,len(value))
                 test,encoding_ = encode(value,returnEncoding=True)
                 extra_encoded = len(test) - self.maxSize
                 if extra_encoded > 0:
@@ -495,8 +495,8 @@ class MelString16(MelString):
                     while total < extra_encoded:
                         total += len(value[i].encode(encoding_))
                         i -= 1
-                    size += i + 1
-                    value = value[:size]
+                    str_size += i + 1
+                    value = value[:str_size]
                     value = encode(value,firstEncoding=encoding_)
                 else:
                     value = test
@@ -521,7 +521,7 @@ class MelString32(MelString):
         if value is not None:
             if self.maxSize:
                 value = winNewLines(value.rstrip())
-                size = min(self.maxSize,len(value))
+                str_size = min(self.maxSize,len(value))
                 test,encoding_ = encode(value,returnEncoding=True)
                 extra_encoded = len(test) - self.maxSize
                 if extra_encoded > 0:
@@ -530,8 +530,8 @@ class MelString32(MelString):
                     while total < extra_encoded:
                         total += len(value[i].encode(encoding_))
                         i -= 1
-                    size += i + 1
-                    value = value[:size]
+                    str_size += i + 1
+                    value = value[:str_size]
                     value = encode(value,firstEncoding=encoding_)
                 else:
                     value = test
@@ -907,9 +907,9 @@ class MelVmad(MelBase):
             self.fragments = None
             self.aliases = None
 
-        def loadData(self,record,ins,size,readId):
+        def loadData(self, record, ins, size_, readId):
             insTell = ins.tell
-            endOfField = insTell() + size
+            endOfField = insTell() + size_
             self.scripts = []
             scriptsAppend = self.scripts.append
             Script = MelVmad.Script
@@ -2211,8 +2211,9 @@ class MreDial(MelRecord):
         if not self.infos: return
         # Magic number '24': size of Skyrim's record header
         # Magic format '4sIIIII': format for Skyrim's GRUP record
-        size = 24 + sum([24 + info.getSize() for info in self.infos])
-        out.pack('4sIIIII','GRUP',size,self.fid,7,self.infoStamp,self.infoStamp2)
+        dial_size = 24 + sum([24 + info.getSize() for info in self.infos])
+        out.pack('4sIIIII', 'GRUP', dial_size, self.fid, 7, self.infoStamp,
+                 self.infoStamp2)
         for info in self.infos: info.dump(out)
 
     def updateMasters(self,masters):

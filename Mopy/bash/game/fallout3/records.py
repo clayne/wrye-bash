@@ -1313,8 +1313,9 @@ class MreDial(MelRecord):
         if not self.infos: return
         # Magic number '24': size of Fallout 3's record header
         # Magic format '4sIIIII': format for Fallout 3's GRUP record
-        size = 24 + sum([24 + info.getSize() for info in self.infos])
-        out.pack('4sIIIII','GRUP',size,self.fid,7,self.infoStamp,self.infoStamp2)
+        dial_size = 24 + sum([24 + info.getSize() for info in self.infos])
+        out.pack('4sIIIII', 'GRUP', dial_size, self.fid, 7, self.infoStamp,
+                 self.infoStamp2)
         for info in self.infos: info.dump(out)
 
     def updateMasters(self,masters):

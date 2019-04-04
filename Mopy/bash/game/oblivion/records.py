@@ -824,8 +824,8 @@ class MreDial(MelRecord):
         if not self.infos: return
         # Magic number '20': size of Oblivion's record header
         # Magic format '4sIIII': format for Oblivion's GRUP record
-        size = 20 + sum([20 + info.getSize() for info in self.infos])
-        out.pack('4sIIII','GRUP',size,self.fid,7,self.infoStamp)
+        dial_size = 20 + sum([20 + info.getSize() for info in self.infos])
+        out.pack('4sIIII', 'GRUP', dial_size, self.fid, 7, self.infoStamp)
         for info in self.infos: info.dump(out)
 
     def updateMasters(self,masters):
