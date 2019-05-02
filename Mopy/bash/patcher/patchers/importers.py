@@ -493,6 +493,7 @@ class CBash_CellImporter(_ACellImporter,CBash_ImportPatcher):
                         'fogNear','fogFar','directionalXY','directionalZ',
                         'directionalFade','fogClip'),
             u'C.RecordFlags': ('flags1',), # Yes seems funky but thats the way it is
+            u'C.Regions': ('regions',),
             }
 
     def getTypes(self):
