@@ -33,9 +33,9 @@ import random
 import re
 from collections import defaultdict
 # Internal
-from ... import bush # for defaultEyes (?)
 from ... import bosh # for modInfos
 from ...bolt import SubProgress, GPath, deprint
+from ...bush import game, game_mod
 from ...brec import MreRecord, MelObject, strFid
 from ...cint import ValidateDict, FormID
 from ...exception import BoltError
@@ -675,7 +675,7 @@ class RacePatcher(_ARacePatcher, ListPatcher):
     # TODO(inf) Disgusting globals hack, the tweaks should be ripped into
     # a game-specific module (game/*/patcher/tweaks.py?)
     tweaks = sorted([globals()[tweak_name]() for tweak_name in
-                     bush.game_mod.race_tweaks], key=lambda a: a.label.lower())
+                     game_mod.race_tweaks], key=lambda a: a.label.lower())
 
     #--Patch Phase ------------------------------------------------------------
     def initPatchFile(self, patchFile):
@@ -698,6 +698,13 @@ class RacePatcher(_ARacePatcher, ListPatcher):
                            'skill7', 'skill7Boost'}
         self.eyeKeys = {u'Eyes'}
         self.eye_mesh = {}
+        # Convert vanilla default eyes to use long FormIDs
+        def _conv_fid(race_fid): (GPath(race_fid[0]), race_fid[1])
+        self.vanilla_eyes = {}
+        for race_fid, race_eyes in game_mod.default_eyes:
+            new_key = _conv_fid(race_fid)
+            new_val = [_conv_fid(eye_fid) for eye_fid in race_eyes]
+            self.vanilla_eyes[new_key] = new_val
 
     def initData(self,progress):
         """Get data from source files."""
@@ -809,11 +816,11 @@ class RacePatcher(_ARacePatcher, ListPatcher):
 
     def getReadClasses(self):
         """Returns load factory classes needed for reading."""
-        return bush.game_mod.race_types if self.isActive else ()
+        return game_mod.race_types if self.isActive else ()
 
     def getWriteClasses(self):
         """Returns load factory classes needed for writing."""
-        return bush.game_mod.race_types if self.isActive else ()
+        return game_mod.race_types if self.isActive else ()
 
     def scanModFile(self, modFile, progress):
         """Add appropriate records from modFile."""
@@ -822,8 +829,8 @@ class RacePatcher(_ARacePatcher, ListPatcher):
         eye_mesh = self.eye_mesh
         modName = modFile.fileInfo.name
         mapper = modFile.getLongMapper()
-        if not (set(modFile.tops) & set(bush.game_mod.race_types)): return
-        modFile.convertToLongFids(bush.game_mod.race_types)
+        if not (set(modFile.tops) & set(game_mod.race_types)): return
+        modFile.convertToLongFids(game_mod.race_types)
         srcEyes = set(
             [record.fid for record in modFile.EYES.getActiveRecords()])
         #--Eyes, Hair
@@ -1046,7 +1053,7 @@ class RacePatcher(_ARacePatcher, ListPatcher):
         for tweak in self.enabledTweaks:
             tweak.buildPatch(progress,self.patchFile,extra_)
         #--Sort Eyes/Hair
-        defaultEyes = {}
+        final_eyes = {}
         defaultMaleHair = {}
         defaultFemaleHair = {}
         eyeNames  = dict((x.fid,x.full) for x in patchFile.EYES.records)
@@ -1058,11 +1065,11 @@ class RacePatcher(_ARacePatcher, ListPatcher):
         for race in patchFile.RACE.records:
             if (race.flags.playable or race.fid == (
                     GPath(u'Oblivion.esm'), 0x038010)) and race.eyes:
-                defaultEyes[race.fid] = [x for x in
-                                         bush.defaultEyes.get(race.fid,
-                                             []) if x in race.eyes]
-                if not defaultEyes[race.fid]:
-                    defaultEyes[race.fid] = [race.eyes[0]]
+                final_eyes[race.fid] = [x for x in
+                                        self.vanilla_eyes.get(race.fid, [])
+                                        if x in race.eyes]
+                if not final_eyes[race.fid]:
+                    final_eyes[race.fid] = [race.eyes[0]]
                 defaultMaleHair[race.fid] = [x for x in race.hairs if
                                              x in maleHairs]
                 defaultFemaleHair[race.fid] = [x for x in race.hairs if
@@ -1078,7 +1085,7 @@ class RacePatcher(_ARacePatcher, ListPatcher):
             if npc.full is not None and npc.race == (
                     GPath(u'Oblivion.esm'), 0x038010) and not reProcess.search(
                     npc.full): continue
-            raceEyes = defaultEyes.get(npc.race)
+            raceEyes = final_eyes.get(npc.race)
             if not npc.eye and raceEyes:
                 npc.eye = random.choice(raceEyes)
                 srcMod = npc.fid[0]
@@ -1374,6 +1381,13 @@ class CBash_RacePatcher_Eyes(SpecialPatcher):
         self.srcEyes = {}
         self.eye_meshes = {}
         self.finishedOnce = False
+        # Convert vanilla default eyes to use long FormIDs
+        def _conv_fid(race_fid): (GPath(race_fid[0]), race_fid[1])
+        self.vanilla_eyes = {}
+        for race_fid, race_eyes in game_mod.default_eyes:
+            new_key = _conv_fid(race_fid)
+            new_val = [_conv_fid(eye_fid) for eye_fid in race_eyes]
+            self.vanilla_eyes[new_key] = new_val
 
     def initData(self,group_patchers,progress):
         if not self.isActive: return
@@ -1466,7 +1480,7 @@ class CBash_RacePatcher_Eyes(SpecialPatcher):
         subProgress = SubProgress(progress)
         subProgress.setFull(max(len(Current.LoadOrderMods) * 2,1))
         reX117 = self.reX117
-        defaultEyes = {}
+        final_eyes = {}
         defaultMaleHair = {}
         defaultFemaleHair = {}
         hairNames = self.hairNames
@@ -1603,8 +1617,8 @@ class CBash_RacePatcher_Eyes(SpecialPatcher):
                         if currentEyes != oldEyes:
                             racesSorted.add(race.eid)
                             raceChanged = True
-                        defaultEyes[recordId] = [
-                            x for x in bush.defaultEyes.get(recordId, [])
+                        final_eyes[recordId] = [
+                            x for x in self.vanilla_eyes.get(recordId, [])
                             if x in currentEyes] or currentEyes
                         defaultMaleHair[recordId] = [x for x in currentHairs if
                                                      x in maleHairs]
@@ -1645,7 +1659,7 @@ class CBash_RacePatcher_Eyes(SpecialPatcher):
                 #IsNewest
                 if npc.IsWinning():
                     npcChanged = False
-                    raceEyes = defaultEyes.get(raceId)
+                    raceEyes = final_eyes.get(raceId)
                     eye = npc.eye
                     if eye is None and raceEyes:
                         eye = random.choice(raceEyes)

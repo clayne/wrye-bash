@@ -1308,6 +1308,54 @@ inventoryTypes = ('CREA','NPC_','CONT',)
 #------------------------------------------------------------------------------
 # Race Patcher
 #------------------------------------------------------------------------------
+# See oblivion/constants.py for my thoughts on this
+_fnv = lambda x: (u'FalloutNV.esm', x)
+standard_eyes = [_fnv(x) for x in (0x4252, 0x4253, 0x4254, 0x4255, 0x4256)]
+default_eyes = {
+    #--FalloutNV.esm
+    # Caucasian
+    _fnv(0x000019): standard_eyes,
+    # Hispanic
+    _fnv(0x0038e5): standard_eyes,
+    # Asian
+    _fnv(0x0038e6): standard_eyes,
+    # Ghoul
+    _fnv(0x003b3e): [_fnv(0x35e4f)],
+    # AfricanAmerican
+    _fnv(0x00424a): standard_eyes,
+    # AfricanAmerican Child
+    _fnv(0x0042be): standard_eyes,
+    # AfricanAmerican Old
+    _fnv(0x0042bf): standard_eyes,
+    # Asian Child
+    _fnv(0x0042c0): standard_eyes,
+    # Asian Old
+    _fnv(0x0042c1): standard_eyes,
+    # Caucasian Child
+    _fnv(0x0042c2): standard_eyes,
+    # Caucasian Old
+    _fnv(0x0042c3): standard_eyes,
+    # Hispanic Child
+    _fnv(0x0042c4): standard_eyes,
+    # Hispanic Old
+    _fnv(0x0042c5): standard_eyes,
+    # Caucasian Raider
+    _fnv(0x04bb8d): [_fnv(0x4cb10)],
+    # Hispanic Raider
+    _fnv(0x04bf70): [_fnv(0x4cb10)],
+    # Asian Raider
+    _fnv(0x04bf71): [_fnv(0x4cb10)],
+    # AfricanAmerican Raider
+    _fnv(0x04bf72): [_fnv(0x4cb10)],
+    # Hispanic Old Aged
+    _fnv(0x0987dc): standard_eyes,
+    # Asian Old Aged
+    _fnv(0x0987dd): standard_eyes,
+    # AfricanAmerican Old Aged
+    _fnv(0x0987de): standard_eyes,
+    # Caucasian Old Aged
+    _fnv(0x0987df): standard_eyes,
+}
 race_tweaks = ()
 race_types = ()
 #------------------------------------------------------------------------------

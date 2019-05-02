@@ -1635,6 +1635,65 @@ inventoryTypes = ('CREA','NPC_','CONT',)
 #------------------------------------------------------------------------------
 # Race Patcher
 #------------------------------------------------------------------------------
+# TODO(inf) Should these be del'd later?
+_ob = lambda x: (u'Oblivion.esm', x)
+_cobl = lambda x: (u'Cobl Main.esm', x)
+standard_eyes = [_ob(x) for x in (0x27306, 0x27308, 0x27309)] + \
+                [_cobl(x) for x in (0x000821, 0x000823, 0x000825, 0x000828,
+                                    0x000834, 0x000837, 0x000839, 0x00084F)]
+default_eyes = {
+    #--Oblivion.esm
+    # Argonian
+    _ob(0x23FE9): [_ob(0x3E91E)] +
+                  [_cobl(x) for x in (0x01F407, 0x01F408, 0x01F40B, 0x01F40C,
+                                      0x01F410, 0x01F411, 0x01F414, 0x01F416,
+                                      0x01F417, 0x01F41A, 0x01F41B, 0x01F41E,
+                                      0x01F41F, 0x01F422, 0x01F424)],
+    # Breton
+    _ob(0x0224FC): standard_eyes,
+    # Dark Elf
+    _ob(0x0191C1): [_ob(0x27307)] +
+                   [_cobl(x) for x in (0x000861, 0x000864, 0x000851)],
+    # High Elf
+    _ob(0x019204): standard_eyes,
+    # Imperial
+    _ob(0x000907): standard_eyes,
+    # Khajiit
+    _ob(0x022C37): [_ob(0x375c8)] +
+                   [_cobl(x) for x in (0x00083B, 0x00083E, 0x000843, 0x000846,
+                                       0x000849, 0x00084C)],
+    # Nord
+    _ob(0x0224FD): standard_eyes,
+    # Orc
+    _ob(0x0191C0): [_ob(0x2730A)] +
+                   [_cobl(x) for x in (0x000853, 0x000855, 0x000858, 0x00085A,
+                                       0x00085C, 0x00085E)],
+    # Redguard
+    _ob(0x000D43): standard_eyes,
+    # Wood Elf
+    _ob(0x0223C8): standard_eyes,
+    #--Cobl Main.esm
+    # cobRaceAureal
+    _cobl(0x07948): [_ob(0x54BBA)],
+    # cobRaceHidden
+    _cobl(0x02B60): [_cobl(x) for x in (0x01F43A, 0x01F438, 0x01F439, 0x0015A7,
+                                        0x01792C, 0x0015AC, 0x0015A8, 0x0015AB,
+                                        0x0015AA)],
+    # cobRaceMazken
+    _cobl(0x07947): [_ob(0x54BB9)],
+    # cobRaceOhmes
+    _cobl(0x1791B): [_cobl(x) for x in (0x017901, 0x017902, 0x017903, 0x017904,
+                                        0x017905, 0x017906, 0x017907, 0x017908,
+                                        0x017909, 0x01790A, 0x01790B, 0x01790C,
+                                        0x01790D, 0x01790E, 0x01790F, 0x017910,
+                                        0x017911, 0x017912, 0x017913, 0x017914,
+                                        0x017915, 0x017916, 0x017917, 0x017918,
+                                        0x017919, 0x01791A, 0x017900)],
+    # cobRaceXivilai
+    _cobl(0x1F43C): [_cobl(x) for x in (0x01F437, 0x00531B, 0x00531C, 0x00531D,
+                                        0x00531E, 0x00531F, 0x005320, 0x005321,
+                                        0x01F43B, 0x00DBE1)],
+}
 race_tweaks = (u'RaceTweaker_BiggerOrcsAndNords',
                u'RaceTweaker_MergeSimilarRaceHairs',
                u'RaceTweaker_MergeSimilarRaceEyes',
