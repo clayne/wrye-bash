@@ -678,6 +678,9 @@ class CBash_GraphicsPatcher(_RecTypeModLogging, _AGraphicsPatcher):
         class_attrs['CLAS'] = icon
         class_attrs['LTEX'] = icon
         class_attrs['REGN'] = icon
+        class_attrs['EYES'] = icon
+        class_attrs['QUST'] = icon
+        class_attrs['SKIL'] = icon
         class_attrs['ACTI'] = model
         class_attrs['DOOR'] = model
         class_attrs['FLOR'] = model
@@ -696,6 +699,7 @@ class CBash_GraphicsPatcher(_RecTypeModLogging, _AGraphicsPatcher):
         class_attrs['SLGM'] = icon + model
         class_attrs['WEAP'] = icon + model
         class_attrs['TREE'] = icon + model
+        class_attrs['HAIR'] = icon + model
 
         class_attrs['ARMO'] = ('maleBody_list',
                                'maleWorld_list',
