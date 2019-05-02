@@ -100,10 +100,10 @@ class SkyrimSEGameInfo(SkyrimGameInfo):
             MreInfo, MreIngr, MreIpct, MreIpds, MreKeym, MreKywd, MreLcrt, \
             MreLctn, MreLgtm, MreLigh, MreLscr, MreLvli, MreLvln, MreLvsp, \
             MreMatt, MreMesg, MreMgef, MreMisc, MreMovt, MreMstt, MreMusc, \
-            MreMust, MreNpc, MreOtft, MreProj, MreQust, MreRegn, MreRela, \
-            MreRevb, MreRfct, MreScrl, MreShou, MreSlgm, MreSmbn, MreSmen, \
-            MreSmqn, MreSnct, MreSndr, MreSopm, MreSoun, MreSpel, MreSpgd, \
-            MreTact, MreTree, MreTxst, MreVtyp, MreWoop, MreWrld
+            MreMust, MreNpc, MreOtft, MreProj, MreQust, MreRace, MreRegn, \
+            MreRela, MreRevb, MreRfct, MreScrl, MreShou, MreSlgm, MreSmbn, \
+            MreSmen, MreSmqn, MreSnct, MreSndr, MreSopm, MreSoun, MreSpel, \
+            MreSpgd, MreTact, MreTree, MreTxst, MreVtyp, MreWoop, MreWrld
         cls.mergeClasses = (
             # MreAchr, MreDial, MreInfo, MreFact,
             MreAact, MreActi, MreAddn, MreAlch, MreAmmo, MreAnio, MreAppa,
@@ -116,11 +116,11 @@ class SkyrimSEGameInfo(SkyrimGameInfo):
             MreImgs, MreIngr, MreIpct, MreIpds, MreKeym, MreKywd, MreLcrt,
             MreLctn, MreLgtm, MreLigh, MreLscr, MreLtex, MreLvli, MreLvln,
             MreLvsp, MreMato, MreMatt, MreMesg, MreMgef, MreMisc, MreMovt,
-            MreMstt, MreMusc, MreMust, MreNpc, MreOtft, MreProj, MreRegn,
-            MreRela, MreRevb, MreRfct, MreScrl, MreShou, MreSlgm, MreSmbn,
-            MreSmen, MreSmqn, MreSnct, MreSndr, MreSopm, MreSoun, MreSpel,
-            MreSpgd, MreStat, MreTact, MreTree, MreTxst, MreVtyp, MreWatr,
-            MreWeap, MreWoop, MreWthr, MreVoli, MreLens,
+            MreMstt, MreMusc, MreMust, MreNpc, MreOtft, MreProj, MreRace,
+            MreRegn, MreRela, MreRevb, MreRfct, MreScrl, MreShou, MreSlgm,
+            MreSmbn, MreSmen, MreSmqn, MreSnct, MreSndr, MreSopm, MreSoun,
+            MreSpel, MreSpgd, MreStat, MreTact, MreTree, MreTxst, MreVtyp,
+            MreWatr, MreWeap, MreWoop, MreWthr, MreVoli, MreLens,
             ####### for debug
             MreQust,
         )
@@ -140,7 +140,7 @@ class SkyrimSEGameInfo(SkyrimGameInfo):
             'RGDL', 'DOBJ', 'LGTM', 'MUSC', 'FSTP', 'FSTS', 'SMBN', 'SMQN',
             'SMEN', 'DLBR', 'MUST', 'DLVW', 'WOOP', 'SHOU', 'EQUP', 'RELA',
             'SCEN', 'ASTP', 'OTFT', 'ARTO', 'MATO', 'MOVT', 'SNDR', 'DUAL',
-            'SNCT', 'SOPM', 'COLL', 'CLFM', 'REVB', 'LENS', 'VOLI']
+            'SNCT', 'SOPM', 'COLL', 'CLFM', 'REVB', 'LENS', 'VOLI', 'RACE']
         #-> this needs updating for Skyrim
         brec.RecordHeader.recordTypes = set(
             brec.RecordHeader.topTypes + ['GRUP', 'TES4', 'REFR', 'ACHR',
@@ -159,11 +159,11 @@ class SkyrimSEGameInfo(SkyrimGameInfo):
             MreIpds, MreKeym, MreKywd, MreLcrt, MreLctn, MreLgtm, MreLigh,
             MreLscr, MreLtex, MreLvli, MreLvln, MreLvsp, MreMato, MreMatt,
             MreMesg, MreMgef, MreMisc, MreMovt, MreMstt, MreMusc, MreMust,
-            MreNpc, MreOtft, MreProj, MreRegn, MreRela, MreRevb, MreRfct,
-            MreScrl, MreShou, MreSlgm, MreSmbn, MreSmen, MreSmqn, MreSnct,
-            MreSndr, MreSopm, MreSoun, MreSpel, MreSpgd, MreStat, MreTact,
-            MreTree, MreTxst, MreVtyp, MreWatr, MreWeap, MreWoop, MreWthr,
-            MreCell, MreWrld, MreVoli, MreLens,  # MreNavm, MreNavi
+            MreNpc, MreOtft, MreProj, MreRace, MreRegn, MreRela, MreRevb,
+            MreRfct, MreScrl, MreShou, MreSlgm, MreSmbn, MreSmen, MreSmqn,
+            MreSnct, MreSndr, MreSopm, MreSoun, MreSpel, MreSpgd, MreStat,
+            MreTact, MreTree, MreTxst, MreVtyp, MreWatr, MreWeap, MreWoop,
+            MreWthr, MreCell, MreWrld, MreVoli, MreLens, # MreNavm, MreNavi
             ####### for debug
             MreQust, MreHeader,
         ))
