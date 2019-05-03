@@ -17317,6 +17317,8 @@ inventoryTypes = ('NPC_','CONT',)
 #------------------------------------------------------------------------------
 standard_eyes = []
 default_eyes = {}
+race_auto_keys = set()
+race_rec_attrs = {}
 race_tweaks = ()
 race_types = ('NPC_', 'RACE')
 

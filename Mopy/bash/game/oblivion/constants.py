@@ -1694,6 +1694,12 @@ default_eyes = {
                                         0x00531E, 0x00531F, 0x005320, 0x005321,
                                         0x01F43B, 0x00DBE1)],
 }
+race_auto_keys = {u'R.Head', u'R.Ears', u'Eyes', u'Voice-F', u'R.ChangeSpells',
+                  u'R.Teeth', u'Voice-M', u'R.Attributes-M', u'R.Attributes-F',
+                  u'Body-F', u'Body-M', u'R.Mouth', u'R.Description',
+                  u'R.AddSpells', u'Body-Size-F', u'R.Relations',
+                  u'Body-Size-M', u'R.Skills', u'Hair'}
+race_rec_attrs = {}
 race_tweaks = (u'RaceTweaker_BiggerOrcsAndNords',
                u'RaceTweaker_MergeSimilarRaceHairs',
                u'RaceTweaker_MergeSimilarRaceEyes',
