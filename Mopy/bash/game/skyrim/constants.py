@@ -17319,8 +17319,12 @@ standard_eyes = []
 default_eyes = {}
 race_auto_keys = set()
 race_rec_attrs = {}
+race_types = ('RACE',)
+#------------------------------------------------------------------------------
+# Race Tweaker
+#------------------------------------------------------------------------------
 race_tweaks = ()
-race_types = ('NPC_', 'RACE')
+race_tweak_types = ()
 
 # Record type to name dictionary
 record_type_name = {
