@@ -934,7 +934,7 @@ graphicsTypes = {
     "AMMO": ('iconPath','model',),
     "ARMA": ('maleBody','maleWorld','maleIconPath','femaleBody','femaleWorld','femaleIconPath',),
     "ARMO": ('maleBody','maleWorld','maleIconPath','femaleBody','femaleWorld','femaleIconPath',
-	         'objectEffect',),
+             'objectEffect',),
     "BOOK": ('iconPath','model',),
     "CLAS": ('iconPath',),
     "CREA": ('bodyParts','nift_p','effect',),

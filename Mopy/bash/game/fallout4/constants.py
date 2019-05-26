@@ -159,20 +159,20 @@ allBethFiles = {
     # Section 3: F4SE INI File
     u'F4SE\\f4se.ini',
     # Section 4: GECK files
-	u'Scripts\\Source\\Base\\Base.zip',
-	u'Scripts\\Source\\DLC01\\DLC01.zip',
-	u'Scripts\\Source\\DLC02\\DLC02.zip',
-	u'Scripts\\Source\\DLC03\\DLC03.zip',
-	u'Scripts\\Source\\DLC04\\DLC04.zip',
-	u'Scripts\\Source\\DLC05\\DLC05.zip',
-	u'Scripts\\Source\\DLC06\\DLC06.zip',
-	# Section 5: Other Files
-	u'LSData\\DtC6dal.dat',
-	u'LSData\\DtC6dl.dat',
-	u'LSData\\Wt8S9bs.dat',
-	u'LSData\\Wt8S9fs.dat',
-	u'LSData\\Wt16M9bs.dat',
-	u'LSData\\Wt16M9fs.dat',
+    u'Scripts\\Source\\Base\\Base.zip',
+    u'Scripts\\Source\\DLC01\\DLC01.zip',
+    u'Scripts\\Source\\DLC02\\DLC02.zip',
+    u'Scripts\\Source\\DLC03\\DLC03.zip',
+    u'Scripts\\Source\\DLC04\\DLC04.zip',
+    u'Scripts\\Source\\DLC05\\DLC05.zip',
+    u'Scripts\\Source\\DLC06\\DLC06.zip',
+    # Section 5: Other Files
+    u'LSData\\DtC6dal.dat',
+    u'LSData\\DtC6dl.dat',
+    u'LSData\\Wt8S9bs.dat',
+    u'LSData\\Wt8S9fs.dat',
+    u'LSData\\Wt16M9bs.dat',
+    u'LSData\\Wt16M9fs.dat',
 }
 
 # Function Info ---------------------------------------------------------------
