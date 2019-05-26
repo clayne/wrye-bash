@@ -215,7 +215,7 @@ class SkyrimGameInfo(GameInfo):
     @classmethod
     def init(cls):
         from .. import dynamic_import_hack
-        dynamic_import_hack(__name__)
+        dynamic_import_hack(cls, __name__)
         from .records import MreCell, MreWrld, MreFact, MreAchr, MreDial, \
             MreInfo, MreCams, MreWthr, MreDual, MreMato, MreVtyp, MreMatt, \
             MreLvsp, MreEnch, MreProj, MreDlbr, MreRfct, MreMisc, MreActi, \

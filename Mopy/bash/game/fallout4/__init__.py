@@ -135,7 +135,7 @@ class Fallout4GameInfo(GameInfo):
     @classmethod
     def init(cls):
         from .. import dynamic_import_hack
-        dynamic_import_hack(__name__)
+        dynamic_import_hack(cls, __name__)
         # First import from fallout4.records file, so MelModel is set correctly
         from .records import MreHeader, MreLvli, MreLvln
         # ---------------------------------------------------------------------

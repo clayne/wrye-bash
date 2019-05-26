@@ -85,7 +85,7 @@ class SkyrimSEGameInfo(SkyrimGameInfo):
     @classmethod
     def init(cls):
         from .. import dynamic_import_hack
-        dynamic_import_hack(__name__)
+        dynamic_import_hack(cls, __name__)
         # First import from skyrimse.records file
         from .records import MreWthr, MreMato, MreLtex, MreWatr, MreWeap, \
             MreStat, MreAmmo, MreVoli, MreLens

@@ -991,10 +991,6 @@ graphicsModelAttrs = ('model','shellCasingModel','scopeModel','worldModel')
 # Inventory Patcher
 #------------------------------------------------------------------------------
 inventoryTypes = ('CREA','NPC_','CONT',)
-#------------------------------------------------------------------------------
-# Mod Record Elements ---------------------------------------------------------
-#------------------------------------------------------------------------------
-FID = 'FID' #--Used by MelStruct classes to indicate fid elements.
 
 # Record type to name dictionary
 record_type_name = {

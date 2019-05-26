@@ -23,22 +23,21 @@
 # =============================================================================
 """GameInfo class encapsulating static info for active game. Avoid adding
 state and methods. game.GameInfo#init classmethod is used to import rest of
-active game package as needed (currently the record module) and to set some
-brec.RecordHeader/MreRecord class variables."""
+active game package as needed (currently the record and constants modules)
+and to set some brec.RecordHeader/MreRecord class variables."""
+import importlib
 
 from .. import brec
-# from .constants import * # TODO(ut): create a .constants module
 
-def dynamic_import_hack(package_name):
-    print __name__
-    print package_name
-    import importlib
+def dynamic_import_hack(cls, package_name):
+    print __name__ # bash.game
+    print package_name # bash.game.oblivion
     constants = importlib.import_module('.constants', package=package_name)
     print "-----------------------dir(constants)", dir(constants)
     import sys
     for k in dir(constants):
         if k.startswith('_'): continue
-        setattr(sys.modules[package_name], k, getattr(constants, k))
+        setattr(cls, k, getattr(constants, k))
     print "-----------------------dir(sys.modules[__name__])", dir(
         sys.modules[__name__])
 
@@ -280,6 +279,128 @@ class GameInfo(object):
     # patchers don't need them directly (for example, for MGEF info)
     readClasses = ()
     writeClasses = ()
+
+    # Class attributes moved to constants module, set dynamically at init
+    ['GlobalsTweaks', 'GmstTweaks', 'allBethFiles', 'allConditions',
+     'bethDataFiles', 'cellAutoKeys', 'cellRecAttrs', 'cellRecFlags',
+     'conditionFunctionData', 'fid1Conditions', 'fid2Conditions', 'gmstEids',
+     'graphicsFidTypes', 'graphicsLongsTypes', 'graphicsModelAttrs',
+     'graphicsTypes', 'inventoryTypes', 'listTypes', 'namesTypes',
+     'pricesTypes', 'record_type_name', 'soundsLongsTypes', 'soundsTypes',
+     'statsHeaders', 'statsTypes', 'xEdit_expert']
+    #--Game ESM/ESP/BSA files
+    ## These are all of the ESM,ESP,and BSA data files that belong to the game
+    ## These filenames need to be in lowercase,
+    bethDataFiles = set()  # initialize with literal
+
+    #--Every file in the Data directory from Bethsoft
+    allBethFiles = set()  # initialize with literal
+
+    # Function Info -----------------------------------------------------------
+    conditionFunctionData = (  #--0: no param; 1: int param; 2: formid param
+    )
+    allConditions = set(entry[0] for entry in conditionFunctionData)
+    fid1Conditions = set(
+        entry[0] for entry in conditionFunctionData if entry[2] == 2)
+    fid2Conditions = set(
+        entry[0] for entry in conditionFunctionData if entry[3] == 2)
+
+    #--List of GMST's in the main plugin (Oblivion.esm) that have 0x00000000
+    #  as the form id.  Any GMST as such needs it Editor Id listed here.
+    gmstEids = []
+
+    """
+    GLOB record tweaks used by patcher.patchers.multitweak_settings.GmstTweaker
+
+    Each entry is a tuple in the following format:
+      (DisplayText, MouseoverText, GLOB EditorID, Option1, Option2, ...,
+      OptionN)
+      -EditorID can be a plain string, or a tuple of multiple Editor IDs.
+      If it's a tuple, then Value (below) must be a tuple of equal length,
+      providing values for each GLOB
+    Each Option is a tuple:
+      (DisplayText, Value)
+      - If you enclose DisplayText in brackets like this: _(u'[Default]'),
+      then the patcher will treat this option as the default value.
+      - If you use _(u'Custom') as the entry, the patcher will bring up a
+      number input dialog
+
+    To make a tweak Enabled by Default, enclose the tuple entry for the
+    tweak in a list, and make a dictionary as the second list item with {
+    'defaultEnabled ':True}. See the UOP Vampire face fix for an example of
+    this (in the GMST Tweaks)
+    """
+    GlobalsTweaks = []
+
+    """
+    GMST record tweaks used by patcher.patchers.multitweak_settings.GmstTweaker
+
+    Each entry is a tuple in the following format:
+      (DisplayText, MouseoverText, GMST EditorID, Option1, Option2, ...,
+      OptionN)
+      - EditorID can be a plain string, or a tuple of multiple Editor IDs.
+      If it's a tuple, then Value (below) must be a tuple of equal length,
+      providing values for each GMST
+    Each Option is a tuple:
+      (DisplayText, Value)
+      - If you enclose DisplayText in brackets like this: _(u'[Default]'),
+      then the patcher will treat this option as the default value.
+      - If you use _(u'Custom') as the entry, the patcher will bring up a
+      number input dialog
+
+    To make a tweak Enabled by Default, enclose the tuple entry for the
+    tweak in a list, and make a dictionary as the second list item with {
+    'defaultEnabled ':True}. See the UOP Vampire facefix for an example of
+    this (in the GMST Tweaks)
+    """
+    GmstTweaks = []
+
+    #--------------------------------------------------------------------------
+    # ListsMerger patcher (leveled list patcher)
+    #--------------------------------------------------------------------------
+    listTypes = ()
+    #--------------------------------------------------------------------------
+    # NamesPatcher
+    #--------------------------------------------------------------------------
+    namesTypes = set()  # initialize with literal
+    #--------------------------------------------------------------------------
+    # ItemPrices Patcher
+    #--------------------------------------------------------------------------
+    pricesTypes = {}
+    #--------------------------------------------------------------------------
+    # StatsImporter
+    #--------------------------------------------------------------------------
+    statsTypes = {}
+    statsHeaders = ()
+    #--------------------------------------------------------------------------
+    # SoundPatcher
+    #--------------------------------------------------------------------------
+    # Needs longs in SoundPatcher
+    soundsLongsTypes = set()  # initialize with literal
+    soundsTypes = {}
+    #--------------------------------------------------------------------------
+    # CellImporter
+    #--------------------------------------------------------------------------
+    cellAutoKeys = set()  # use a set literal
+    cellRecAttrs = {}
+    cellRecFlags = {}
+    #--------------------------------------------------------------------------
+    # GraphicsPatcher
+    #--------------------------------------------------------------------------
+    graphicsLongsTypes = set()  # initialize with literal
+    graphicsTypes = {}
+    graphicsFidTypes = {}
+    graphicsModelAttrs = ()
+    #--------------------------------------------------------------------------
+    # Inventory Patcher
+    #--------------------------------------------------------------------------
+    inventoryTypes = ()
+
+    # Record type to name dictionary
+    record_type_name = {}
+
+    # xEdit menu string and key for expert setting
+    xEdit_expert = ()
 
     @classmethod
     def init(cls):
