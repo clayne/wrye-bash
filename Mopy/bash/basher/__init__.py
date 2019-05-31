@@ -3751,7 +3751,7 @@ class BashFrame(BaltFrame):
         else:
             title += u': '
         save_prefix = re.escape(bush.game.saveProfilesKey[2])
-        maProfile = re.match(save_prefix + ur'(.+)\\$',
+        maProfile = re.match(save_prefix + ur'\\(.+)$',
                              bosh.saveInfos.localSave, re.U)
         if maProfile:
             title += maProfile.group(1)

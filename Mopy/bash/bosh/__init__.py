@@ -2663,9 +2663,8 @@ class SaveInfos(FileInfos):
         """Read the current save profile from the oblivion.ini file and set
         local save attribute to that value."""
         # saveInfos singleton is constructed in InitData after bosh.oblivionIni
-        self.localSave = oblivionIni.getSetting(
-            bush.game.saveProfilesKey[0], bush.game.saveProfilesKey[1],
-            bush.game.saveProfilesKey[2])
+        self.localSave = oblivionIni.getSetting(*bush.game.saveProfilesKey)
+        if self.localSave.endswith(u'\\'): self.localSave = self.localSave[:-1]
         # Hopefully will solve issues with unicode usernames # TODO(ut) test
         self.localSave = decode(self.localSave) # encoding = 'cp1252' ?
 
@@ -2682,6 +2681,10 @@ class SaveInfos(FileInfos):
         # Save Profiles database
         self.profiles = bolt.Table(bolt.PickleDict(
             dirs['saveBase'].join(u'BashProfiles.dat')))
+        # save profiles used to have a trailing slash, remove it if present
+        for row in self.profiles.keys():
+            if row.endswith(u'\\'):
+                self.profiles.moveRow(row, row[:-1])
         co_types = cosaves.get_cosave_types(bush.game.fsName,
                                             bush.game.ess.ext)
         SaveInfo.cosave_types = co_types
@@ -2765,7 +2768,7 @@ class SaveInfos(FileInfos):
         self.localSave = localSave
         oblivionIni.saveSetting(bush.game.saveProfilesKey[0],
                                 bush.game.saveProfilesKey[1],
-                                localSave)
+                                localSave + u'\\') # TODO(ut): needed?
         self._initDB(dirs['saveBase'].join(self.localSave))
         if refreshSaveInfos: self.refresh()
 
