@@ -63,13 +63,13 @@ def _import_wx():
     global _wx
     try:
         # Import wx once and for all
-        WXVER = '4.0.6'
-        import wxversion
-        if wxversion.checkInstalled(WXVER):
-            wxversion.select(WXVER)
-            versionOK = True
-        else:
-            versionOK = False
+        # WXVER = '4.0.6'
+        # import wxversion
+        # if wxversion.checkInstalled(WXVER):
+        #     wxversion.select(WXVER)
+        #     versionOK = True
+        # else:
+        #     versionOK = False
         import wx as _wx
         bass.wx = _wx
     except ImportError:
