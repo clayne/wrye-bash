@@ -71,12 +71,14 @@ def _import_wx():
         # else:
         #     versionOK = False
         import wx as _wx
+        from wx import _core
+        sys.modules['wx._gdi'] = _core
         bass.wx = _wx
-    except ImportError:
+    except Exception as e:
         but_kwargs = {'text': _(u"QUIT"),
                       'fg': 'red'}  # foreground button color
-        msg = u'\n'.join([dump_environment(), u'',
-            _(u'Unable to locate wxpython installation. Exiting.')])
+        msg = u'\n'.join([dump_environment(), u'', u'Unable to load wx:',
+                          traceback.format_exc(e), u'Exiting.'])
         _tkinter_error_dial(msg, but_kwargs)
         sys.exit(1)
 
