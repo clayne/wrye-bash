@@ -175,20 +175,22 @@ Footer Control Formatting
 	padding-top: 0.0625rem;			/* 1px */
 	text-decoration: none;
 }
-#footer #oldie {
-    position: absolute;
-    text-align: right;
-    z-index: 1;
+#footer #oldie, #footer #version {
     font-size: 0.625rem;			/* 10x */
 	margin: auto;
 	padding-top: 0.0625rem;			/* 1px */
+	position: absolute;
+    text-align: right;
+	z-index: 1;
+	left: auto;
     right: 1.5rem;					/* 24px */
 
 }
-.JS-on #footer #oldie {
-	display: none;
-	opacity: 0;
-	visibility: hidden;
+#footer #version {
+	position: absolute;
+	text-align: left;
+	left: 1.5rem;					/* 24px */
+	right: auto;
 }
 
 
@@ -385,9 +387,12 @@ Javascript-disabled Formatting
 #contents {
 	margin-top: 1rem;
 }
-#fade, .navhead, #navtab {
-	display: none;
-	visibility: hidden;
+/* Text Formatting */
+.emphasis {
+	color: rgba(223, 0, 0, 1);
+	font-size: 1rem;					/* 16px */
+	font-style: italic;
+	font-weight: bold;
 }
 #navmenu:after {
 	clear: both;
